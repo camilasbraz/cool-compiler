@@ -1,7 +1,7 @@
 /*
  *  The scanner definition for COOL.
  */
- 
+
 /*
  *  Stuff enclosed in %{ %} in the first section is copied verbatim to the
  *  output, so headers and global definitions are placed here to be visible
@@ -13,15 +13,15 @@
 #include <utilities.h>
 
 /* The compiler assumes these identifiers. */
-#define yylval cool_yylval
-#define yylex  cool_yylex
+#define new_yylval cool_yylval
+#define new_yylex  cool_yylex
 
 /* Max size of string constants */
 #define MAX_STR_CONST 1025
 #define YY_NO_UNPUT   /* keep g++ happy */
 /*
    The two statements below are here just so this program will compile.
-   You may need to change or remove them on your final code.
+   You may need to change or remove them in your final code.
 */
 #define yywrap() 1
 #define YY_SKIP_YYWRAP
@@ -37,11 +37,11 @@ extern FILE *fin; /* we read from this file */
 	if ( (result = fread( (char*)buf, sizeof(char), max_size, fin)) < 0) \
 		YY_FATAL_ERROR( "read() in flex scanner failed");
 
-char string_buf[MAX_STR_CONST]; /* to assemble string constants */
-char *string_buf_ptr;
+char string_buffer[MAX_STR_CONST]; /* to assemble string constants */
+char *string_buffer_ptr;
 
-extern int curr_lineno;
-extern int verbose_flag;
+extern int current_line_number;
+extern int verbose_mode;
 
 extern YYSTYPE cool_yylval;
 
@@ -49,8 +49,8 @@ extern YYSTYPE cool_yylval;
  *  Add Your own definitions here
  */
 
-int error_found = 0;
-int str_length = 0;
+int error_detected = 0;
+int string_length = 0;
 int comment_depth = 0;
 int in_nested_comment = 0;
 
@@ -112,9 +112,11 @@ STR_CONST_DELIMITER              \"
   *  Simple and nested comments
   */
 
-{SIMPLE_COMMENT_START} { BEGIN(SIMPLE_COMMENT); }
-<SIMPLE_COMMENT>\n        { curr_lineno++; BEGIN(INITIAL); }
-<SIMPLE_COMMENT>.         {  }
+"--".* {
+  /* This matches a simple comment starting with "--" and extends to the end of the line. */
+  current_line_number++;
+  BEGIN(INITIAL);
+}
 
 {NESTED_COMMENT_START} { comment_depth++; BEGIN(NESTED_COMMENT); in_nested_comment = 1; }
 <NESTED_COMMENT>{NESTED_COMMENT_START} { comment_depth++; }
@@ -132,14 +134,14 @@ STR_CONST_DELIMITER              \"
   }
 }
 <NESTED_COMMENT><<EOF>> {
-    if (error_found)
+    if (error_detected)
       yyterminate();
       
     cool_yylval.error_msg = "EOF in comment";
-    error_found = 1;
+    error_detected = 1;
     return (ERROR);
 }
-<NESTED_COMMENT>\n        { curr_lineno++; }
+<NESTED_COMMENT>\n        { current_line_number++; }
 <NESTED_COMMENT>.         {  }
 
 {NESTED_COMMENT_END} {
@@ -197,7 +199,7 @@ STR_CONST_DELIMITER              \"
 "@"         return '@';
 
 \n {
- curr_lineno++; 
+ current_line_number++; 
 }
 
 {BLANK}+ {}
@@ -236,95 +238,95 @@ STR_CONST_DELIMITER              \"
 
 {STR_CONST_DELIMITER}  { BEGIN(STRING_CONSTANT); }
 <STRING_CONSTANT>{STR_CONST_DELIMITER} {
-  string_buf_ptr = (char*) &string_buf;
-  cool_yylval.symbol = idtable.add_string(string_buf_ptr, str_length);
-  str_length = 0;
+  string_buffer_ptr = (char*) &string_buffer;
+  cool_yylval.symbol = idtable.add_string(string_buffer_ptr, string_length);
+  string_length = 0;
   BEGIN(INITIAL);
   return (STR_CONST);
 }
 <STRING_CONSTANT><<EOF>> {
-    if (error_found)
+    if (error_detected)
       yyterminate();
       
     cool_yylval.error_msg = "EOF in string constant";
-    error_found = 1;
+    error_detected = 1;
     return (ERROR);
 }
 <STRING_CONSTANT>\0 {
   	cool_yylval.error_msg = "String contains null character";
-    str_length = 0;
+    string_length = 0;
 		BEGIN(ESCAPE);
 		return ERROR;
 }
 <STRING_CONSTANT>\n {
   	cool_yylval.error_msg = "Unterminated string constant";
-    str_length = 0;
-    curr_lineno++;
+    string_length = 0;
+    current_line_number++;
 	  BEGIN(INITIAL);
 		return ERROR;
 }
 <STRING_CONSTANT>"\\n" {
-    if (str_length + 1< MAX_STR_CONST) {
-      string_buf[str_length++] = '\n'; 
+    if (string_length + 1< MAX_STR_CONST) {
+      string_buffer[string_length++] = '\n'; 
     } 
     else {
       cool_yylval.error_msg = "String literal too long";
-      str_length = 0;
+      string_length = 0;
       BEGIN(ESCAPE);
       return (ERROR); 
     }
 }
 <STRING_CONSTANT>"\\t" {
-    if (str_length + 1 < MAX_STR_CONST) {
-      string_buf[str_length++] = '\t'; 
+    if (string_length + 1 < MAX_STR_CONST) {
+      string_buffer[string_length++] = '\t'; 
     } 
     else {
       cool_yylval.error_msg = "String literal too long";
-      str_length = 0;
+      string_length = 0;
       BEGIN(ESCAPE);
       return (ERROR); 
     }
 }
 <STRING_CONSTANT>"\\b" {
-    if (str_length + 1 < MAX_STR_CONST) {
-      string_buf[str_length++] = '\b'; 
+    if (string_length + 1 < MAX_STR_CONST) {
+      string_buffer[string_length++] = '\b'; 
     } 
     else {
       cool_yylval.error_msg = "String literal too long";
-      str_length = 0;
+      string_length = 0;
       BEGIN(ESCAPE);
       return (ERROR); 
     }
 }
 <STRING_CONSTANT>"\\f" {
-    if (str_length + 1 < MAX_STR_CONST) {
-      string_buf[str_length++] = '\f'; 
+    if (string_length + 1 < MAX_STR_CONST) {
+      string_buffer[string_length++] = '\f'; 
     } 
     else {
       cool_yylval.error_msg = "String literal too long";
-      str_length = 0;
+      string_length = 0;
       BEGIN(ESCAPE);
       return (ERROR); 
     }
 }
 <STRING_CONSTANT>"\\"[^\0] {
-    if (str_length + 1 < MAX_STR_CONST) {
-      string_buf[str_length++] = yytext[1]; 
+    if (string_length + 1 < MAX_STR_CONST) {
+      string_buffer[string_length++] = yytext[1]; 
     } 
     else {
       cool_yylval.error_msg = "String literal too long";
-      str_length = 0;
+      string_length = 0;
       BEGIN(ESCAPE);
       return (ERROR); 
     }
 }
 <STRING_CONSTANT>. {
-    if (str_length + 1 < MAX_STR_CONST ) {
-      string_buf[str_length++] = yytext[0];
+    if (string_length + 1 < MAX_STR_CONST ) {
+      string_buffer[string_length++] = yytext[0];
     }
     else {
       cool_yylval.error_msg = "String constant too long";
-        str_length = 0;
+        string_length = 0;
 
       BEGIN(ESCAPE);
       return (ERROR); 
