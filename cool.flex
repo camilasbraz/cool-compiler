@@ -161,65 +161,48 @@ STR_CONST_DELIMITER              \"
     return (ERROR);
   }
 }
-  /*
-  *  The single and double character operators.
+/*
+  *  The multiple-character operators.
   */
-{DARROW} return(DARROW);
-{LE}     return(LE);
-{ASSIGN} return(ASSIGN);
+"=>"			return DARROW;
+"<-"			return ASSIGN;
+"<="			return LE;
 
- /* Keywords */
-[[:alpha:]][[:alnum:]_]* {
-    if (strcasecmp(yytext, "true") == 0) {
-        cool_yylval.boolean = true;
-        return BOOL_CONST;
-    }
-    if (strcasecmp(yytext, "false") == 0) {
-        cool_yylval.boolean = false;
-        return BOOL_CONST;
-    }
-    if (strcasecmp(yytext, "class") == 0) return CLASS;
-    if (strcasecmp(yytext, "else") == 0) return ELSE;
-    if (strcasecmp(yytext, "fi") == 0) return FI;
-    if (strcasecmp(yytext, "if") == 0) return IF;
-    if (strcasecmp(yytext, "in") == 0) return IN;
-    if (strcasecmp(yytext, "inherits") == 0) return INHERITS;
-    if (strcasecmp(yytext, "let") == 0) return LET;
-    if (strcasecmp(yytext, "loop") == 0) return LOOP;
-    if (strcasecmp(yytext, "pool") == 0) return POOL;
-    if (strcasecmp(yytext, "then") == 0) return THEN;
-    if (strcasecmp(yytext, "while") == 0) return WHILE;
-    if (strcasecmp(yytext, "case") == 0) return CASE;
-    if (strcasecmp(yytext, "esac") == 0) return ESAC;
-    if (strcasecmp(yytext, "of") == 0) return OF;
-    if (strcasecmp(yytext, "new") == 0) return NEW;
-    if (strcasecmp(yytext, "isvoid") == 0) return ISVOID;
-    if (strcasecmp(yytext, "not") == 0) return NOT;
 
-    cool_yylval.symbol = idtable.add_string(yytext);
-    return OBJECTID;
-}
+ /*
+  * Case Insensitive Keywords
+  */
+(?i:class)		return CLASS;
+(?i:else)		return ELSE;
+(?i:fi)			return FI;
+(?i:if)			return IF;
+(?i:in)			return IN;
+(?i:inherits)		return INHERITS;
+(?i:let)		return LET;
+(?i:loop)		return LOOP;
+(?i:pool)		return POOL;
+(?i:then)		return THEN;
+(?i:while)		return WHILE;
+(?i:case)		return CASE;
+(?i:esac)		return ESAC;
+(?i:of)			return OF;
+(?i:new)		return NEW;
+(?i:isvoid)		return ISVOID;
+(?i:not)		return NOT;
 
-/* Operators and Punctuation */
-"+" | "-" | "*" | "/" | "~" | "<" | "=" | "(" | ")" | "{" | "}" | ";" | ":" | "." | "," | "@" {
-    return yytext[0];
-}
+ /*
+  * Start Case sensitive booleans
+  */
+{TRUE}			{ cool_yylval.boolean = true;
+			return (BOOL_CONST); }
+{FALSE}			{ cool_yylval.boolean = false;
+			return (BOOL_CONST); }
 
 \n {
  curr_lineno++; 
 }
 
 {BLANK}+ {}
-
-{BOOL_CONST_TRUE} {
-  cool_yylval.boolean = true;
-  return (BOOL_CONST);
-}
-
-{BOOL_CONST_FALSE} {
-  cool_yylval.boolean = false;
-  return (BOOL_CONST);
-}
 
 {INT_CONST} {
   cool_yylval.symbol = inttable.add_string(yytext);
