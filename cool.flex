@@ -142,23 +142,25 @@ STR_CONST_DELIMITER              \"
 }
 
 <NESTED_COMMENT><<EOF>> {
-    if (error_found)
-      yyterminate();
-      
+  if (error_found) {
+    yyterminate();
+  } else {
     cool_yylval.error_msg = "EOF in comment";
     error_found = 1;
     return (ERROR);
+  }
 }
+
 <NESTED_COMMENT>\n        { curr_lineno++; }
-<NESTED_COMMENT>.         {  }
+
+<NESTED_COMMENT>.         { }
 
 {NESTED_COMMENT_END} {
   if (!in_nested_comment) {
     cool_yylval.error_msg = "Unmatched *)";
-	  return (ERROR);
+    return (ERROR);
   }
 }
-
   /*
   *  The single and double character operators.
   */
