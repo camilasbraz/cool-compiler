@@ -174,27 +174,30 @@ STR_CONST_DELIMITER              \"
         cool_yylval.boolean = true;
         return BOOL_CONST;
     }
-    else if (strcasecmp(yytext, "false") == 0) {
+    if (strcasecmp(yytext, "false") == 0) {
         cool_yylval.boolean = false;
         return BOOL_CONST;
     }
-    else if (strcasecmp(yytext, "class") == 0) return CLASS;
-    else if (strcasecmp(yytext, "else") == 0) return ELSE;
-    else if (strcasecmp(yytext, "fi") == 0) return FI;
-    else if (strcasecmp(yytext, "if") == 0) return IF;
-    else if (strcasecmp(yytext, "in") == 0) return IN;
-    else if (strcasecmp(yytext, "inherits") == 0) return INHERITS;
-    else if (strcasecmp(yytext, "let") == 0) return LET;
-    else if (strcasecmp(yytext, "loop") == 0) return LOOP;
-    else if (strcasecmp(yytext, "pool") == 0) return POOL;
-    else if (strcasecmp(yytext, "then") == 0) return THEN;
-    else if (strcasecmp(yytext, "while") == 0) return WHILE;
-    else if (strcasecmp(yytext, "case") == 0) return CASE;
-    else if (strcasecmp(yytext, "esac") == 0) return ESAC;
-    else if (strcasecmp(yytext, "of") == 0) return OF;
-    else if (strcasecmp(yytext, "new") == 0) return NEW;
-    else if (strcasecmp(yytext, "isvoid") == 0) return ISVOID;
-    else if (strcasecmp(yytext, "not") == 0) return NOT;
+    if (strcasecmp(yytext, "class") == 0) return CLASS;
+    if (strcasecmp(yytext, "else") == 0) return ELSE;
+    if (strcasecmp(yytext, "fi") == 0) return FI;
+    if (strcasecmp(yytext, "if") == 0) return IF;
+    if (strcasecmp(yytext, "in") == 0) return IN;
+    if (strcasecmp(yytext, "inherits") == 0) return INHERITS;
+    if (strcasecmp(yytext, "let") == 0) return LET;
+    if (strcasecmp(yytext, "loop") == 0) return LOOP;
+    if (strcasecmp(yytext, "pool") == 0) return POOL;
+    if (strcasecmp(yytext, "then") == 0) return THEN;
+    if (strcasecmp(yytext, "while") == 0) return WHILE;
+    if (strcasecmp(yytext, "case") == 0) return CASE;
+    if (strcasecmp(yytext, "esac") == 0) return ESAC;
+    if (strcasecmp(yytext, "of") == 0) return OF;
+    if (strcasecmp(yytext, "new") == 0) return NEW;
+    if (strcasecmp(yytext, "isvoid") == 0) return ISVOID;
+    if (strcasecmp(yytext, "not") == 0) return NOT;
+
+    cool_yylval.symbol = idtable.add_string(yytext);
+    return OBJECTID;
 }
 
 /* Operators and Punctuation */
