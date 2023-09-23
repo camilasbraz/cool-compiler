@@ -212,18 +212,30 @@ STR_CONST_DELIMITER              \"
  curr_lineno++; 
 }
 
-{BLANK}+ {
-  // Ignore whitespace
+{BLANK}+ {}
+
+{BOOL_CONST_TRUE} {
+  cool_yylval.boolean = true;
+  return (BOOL_CONST);
 }
 
-{BOOL_CONST_TRUE} | {BOOL_CONST_FALSE} {
-  cool_yylval.boolean = (strcasecmp(yytext, "true") == 0);
-  return BOOL_CONST;
+{BOOL_CONST_FALSE} {
+  cool_yylval.boolean = false;
+  return (BOOL_CONST);
 }
 
-{INT_CONST} | {TYPEID} | {OBJECTID} {
+{INT_CONST} {
   cool_yylval.symbol = inttable.add_string(yytext);
-  return yytext[0] == '0' ? INT_CONST : OBJECTID; // Identify INT_CONST based on '0' as the first character
+  return (INT_CONST);
+}
+
+{TYPEID} {
+  cool_yylval.symbol = inttable.add_string(yytext);
+  return (TYPEID);
+}
+{OBJECTID} {
+  cool_yylval.symbol = inttable.add_string(yytext);
+  return (OBJECTID);
 }
 
  /*
