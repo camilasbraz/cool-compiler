@@ -51,10 +51,10 @@ int string_length;
 /* forward declarations */
 bool strTooLong();
 void resetStr();
-void setErrMsg(const char* msg);
-void exitStrState(const char* msg);
+void setErrMsg(char* msg);
+void exitStrState(char* msg);
 int strLenErr();
-void addToStr(const char* str);
+void addToStr(char* str);
 
 /* Function to indicate the end of input */
 int yywrap() {
@@ -321,7 +321,7 @@ void resetStr() {
     string_buf[0] = '\0';
 }
 
-void setErrMsg(const char* msg) {
+void setErrMsg(char* msg) {
     cool_yylval.error_msg = msg;
 }
 
@@ -331,6 +331,6 @@ int strLenErr() {
     return ERROR;
 }
 
-void addToStr(const char* str) {
+void addToStr(char* str) {
     strcat(string_buf, str);
 }
