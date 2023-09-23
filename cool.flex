@@ -161,48 +161,68 @@ STR_CONST_DELIMITER              \"
     return (ERROR);
   }
 }
-/*
-  *  The multiple-character operators.
+  /*
+  *  The single and double character operators.
   */
-"=>"			return DARROW;
-"<-"			return ASSIGN;
-"<="			return LE;
-
-
- /*
-  * Case Insensitive Keywords
-  */
-(?i:class)		return CLASS;
-(?i:else)		return ELSE;
-(?i:fi)			return FI;
-(?i:if)			return IF;
-(?i:in)			return IN;
-(?i:inherits)		return INHERITS;
-(?i:let)		return LET;
-(?i:loop)		return LOOP;
-(?i:pool)		return POOL;
-(?i:then)		return THEN;
-(?i:while)		return WHILE;
-(?i:case)		return CASE;
-(?i:esac)		return ESAC;
-(?i:of)			return OF;
-(?i:new)		return NEW;
-(?i:isvoid)		return ISVOID;
-(?i:not)		return NOT;
+{DARROW} return(DARROW);
+{LE}     return(LE);
+{ASSIGN} return(ASSIGN);
 
  /*
-  * Start Case sensitive booleans
+  * Keywords are case-insensitive except for the values true and false,
+  * which must begin with a lower-case letter.
   */
-{TRUE}			{ cool_yylval.boolean = true;
-			return (BOOL_CONST); }
-{FALSE}			{ cool_yylval.boolean = false;
-			return (BOOL_CONST); }
+
+{CLASS}     return (CLASS);
+{ELSE}      return (ELSE);
+{FI}        return (FI);
+{IF}        return (IF);
+{IN}        return (IN);
+{INHERITS}  return (INHERITS);
+{LET}       return (LET);
+{LOOP}      return (LOOP);
+{POOL}      return (POOL);
+{THEN}      return (THEN);
+{WHILE}     return (WHILE);
+{CASE}      return (CASE);
+{ESAC}      return (ESAC);
+{OF}        return (OF);
+{NEW}       return (NEW);
+{ISVOID}    return (ISVOID);
+{NOT}       return (NOT);
+
+"+"         return '+';
+"-"         return '-';
+"*"         return '*';
+"/"         return '/';
+"~"         return '~';
+"<"         return '<';
+"="         return '=';
+"("         return '(';
+")"         return ')';
+"{"         return '{';
+"}"         return '}';
+";"         return ';';
+":"         return ':';
+"."         return '.';
+","         return ',';
+"@"         return '@';
 
 \n {
  curr_lineno++; 
 }
 
 {BLANK}+ {}
+
+{BOOL_CONST_TRUE} {
+  cool_yylval.boolean = true;
+  return (BOOL_CONST);
+}
+
+{BOOL_CONST_FALSE} {
+  cool_yylval.boolean = false;
+  return (BOOL_CONST);
+}
 
 {INT_CONST} {
   cool_yylval.symbol = inttable.add_string(yytext);
