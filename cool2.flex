@@ -31,230 +31,310 @@ extern FILE *fin; /* we read from this file */
 	if ( (result = fread( (char*)buf, sizeof(char), max_size, fin)) < 0) \
 		YY_FATAL_ERROR( "read() in flex scanner failed");
 
-char string_buf[MAX_STR_CONST]; /* to assemble string constants */
-char *string_buf_ptr;
-int ascii;
+/* DECLARATIONS
+ * ======================================================================== */
 
+/* Given
+ * ------------------------------------------------------------------------ */
+
+/* to assemble string constants */
+char string_buf[MAX_STR_CONST];
+char *string_buf_ptr;
 extern int curr_lineno;
 extern int verbose_flag;
-
 extern YYSTYPE cool_yylval;
 
-/*
- *  Add Your own definitions here
- */
+/* Custom
+ * ------------------------------------------------------------------------ */
+
+/* ensures that we properly handle nested comments */
+int comment_depth = 0;
+
+/* ensures that we do not go over Cool's 1024 char limit */ 
+int string_length;
+
+/* forward declarations */
+bool strTooLong();
+void resetStr();
+void setErrMsg(char* msg);
+void exitStrState(char* msg);
+int strLenErr();
+void addToStr(char* str);
 
 %}
 
-/*
- * Define names for regular expressions here.
+/* DEFINITIONS
+ * ======================================================================== */
+
+/* State declarations, which are syntactic sugar for global variables that
+ * keep track of state.
  */
-CLASS						?i:class
-ELSE						?i:else
-FI							?i:fi
-IF							?i:if
-IN							?i:in
-INHERITS				?i:inherits
-ISVOID					?i:isvoid
-LET							?i:let
-LOOP						?i:loop
-POOL						?i:pool
-THEN						?i:then
-WHILE						?i:while
-CASE						?i:case
-ESAC						?i:esac
-NEW							?i:new
-OF							?i:of
-NOT							?i:not
-INT             			[0-9]+
-TRUE						t(?i:rue)
-FALSE						f(?i:alse)
-TYPEID					[A-Z][a-zA-Z0-9_]*
-OBJECTID				[a-z][a-zA-Z0-9_]*
-DARROW          =>
-LE							<=
-ASSIGN					<-
-WHITESPACE			[ \f\r\t\v]+
-NEWLINE					\n
-SYMBOLS					[+/\-*=<.~,;:()@{}]
-INVALID					[^a-zA-Z0-9_ \f\r\t\v\n+/\-*=<.~,;:()@{}]
 %x COMMENT
-%x INLINE_COMMENT
+%x S_LINE_COMMENT
 %x STRING
+%x STRING_ERR
 
+NUMBER          [0-9]
+ALPHANUMERIC    [a-zA-Z0-9_]
+TYPEID          [A-Z]{ALPHANUMERIC}*
+OBJECTID        [a-z]{ALPHANUMERIC}*
+DARROW          =>
+LE              <=
+ASSIGN          <-
 %%
 
- /*
-  *  Nested comments
-  */
-"(*"										{ BEGIN(COMMENT); }
-"*)" {
-	cool_yylval.error_msg = "Unmatched *)";
-	return ERROR;
-}
-<COMMENT><<EOF>> {
-	BEGIN(INITIAL);
-	cool_yylval.error_msg = "EOF in comment";
-	return ERROR;
-}
-<COMMENT>[^*\n]*				{}
-<COMMENT>"*"+[^"*)"\n]*	{}
-<COMMENT>\n							{ curr_lineno++; }
-<COMMENT>"*"+")"        { BEGIN(INITIAL); }
+ /* RULES
+  * flex.sourceforge.net/manual/Patterns.html
+  * ======================================================================== */
 
- /*
-  * Inline comments
-  */
-"--"	{ BEGIN(INLINE_COMMENT); }
-<INLINE_COMMENT><<EOF>> {
-	BEGIN(INITIAL);
-	cool_yylval.error_msg = "EOF in comment";
-	return ERROR;
-}
-<INLINE_COMMENT>[^\n]*	{}
-<INLINE_COMMENT>\n {
-	curr_lineno++;
-	BEGIN(INITIAL);
-}
+ /* Comments
+  * ------------------------------------------------------------------------ */
 
- /*
-  *  The multiple-character operators.
-  */
-{INT} {
-	cool_yylval.symbol = inttable.add_string(yytext);
-	return INT_CONST;
-}
-{TRUE} {
-	cool_yylval.boolean = true;
-	return BOOL_CONST;
-}
-{FALSE} {
-	cool_yylval.boolean = false;
-	return BOOL_CONST;
-}
-{DARROW}		{ return (DARROW); }
-{LE}				{ return (LE); }
-{ASSIGN}		{ return (ASSIGN); }
-{WHITESPACE}	{}
-{NEWLINE}		{ curr_lineno++; }
-{SYMBOLS} 	{ return int(yytext[0]); }
+"(*"                {
+                        comment_depth++;
+                        BEGIN(COMMENT);
+                    }
+<COMMENT>"(*"       {   comment_depth++; }
+<COMMENT>.          {}
+<COMMENT>\n         {   curr_lineno++; }
+<COMMENT>"*)"       {
+                        comment_depth--;
+                        if (comment_depth == 0) {
+                            BEGIN(INITIAL);
+                        }
+                    }
+<COMMENT><<EOF>>    {
+                        setErrMsg("EOF in comment");
+                        BEGIN(INITIAL);
+                        return ERROR;
+	                }
+"*)"                {
+                        setErrMsg("Unmatched *)");
+                        BEGIN(INITIAL);
+                        return ERROR;
+	                }
+"--"                {   BEGIN(S_LINE_COMMENT); }
+<S_LINE_COMMENT>.   {}
+<S_LINE_COMMENT>\n  {
+                        curr_lineno++;
+                        BEGIN(INITIAL);
+                    }
+
+ /* Numbers and operators
+  * ------------------------------------------------------------------------ */
+
+{NUMBER}+       {
+                    cool_yylval.symbol = inttable.add_string(yytext);
+                    return INT_CONST;
+	            }
+{DARROW}		{   return DARROW; }
+{LE}            {   return LE; }
+{ASSIGN}        {   return ASSIGN; }
+"+"             {   return '+'; }
+"/"             {   return '/'; }
+"-"             {   return '-'; }
+"*"             {   return '*'; }
+"="             {   return '='; }
+"<"             {   return '<'; }
+"."             {   return '.'; }
+"~"             {   return '~'; }
+","             {   return ','; }
+";"             {   return ';'; }
+":"             {   return ':'; }
+"("             {   return '('; }
+")"             {   return ')'; }
+"@"             {   return '@'; }
+"{"             {   return '{'; }
+"}"             {   return '}'; }
 
 
- /*
-  * Keywords are -insensitive except for the values true and false,
-  * which must begin with a lower- letter.
-  */
-{CLASS}			{ return (CLASS); }
-{ELSE}			{ return (ELSE); }
-{FI}				{ return (FI); }
-{IF}				{ return (IF); }
-{IN}				{ return (IN); }
-{INHERITS}	{ return (INHERITS); }
-{ISVOID}		{ return (ISVOID); }
-{LET}				{ return (LET); }
-{LOOP}			{ return (LOOP); }
-{POOL}			{ return (POOL); }
-{THEN}			{ return (THEN); }
-{WHILE}			{ return (WHILE); }
-{CASE}			{ return (CASE); }
-{ESAC}			{ return (ESAC); }
-{NEW}				{ return (NEW); }
-{OF}				{ return (OF); }
-{NOT}				{ return (NOT); }
+ /* Keywords
+  * 
+  * Keywords are case-insensitive except for the values true and false,
+  * which must begin with a lower-case letter.
+  * ------------------------------------------------------------------------ */
 
-{TYPEID} {
-	cool_yylval.symbol = idtable.add_string(yytext);
-	return (TYPEID);
-}
-{OBJECTID} {
-	cool_yylval.symbol = idtable.add_string(yytext);
-	return (OBJECTID);
-}
- /*
-  *  String constants (C syntax)
-  *  Escape sequence \c is accepted for all characters c. Except for
-  *  \n \t \b \f, the result is c.
-  *
-  */
-\" {
-	string_buf_ptr = string_buf;
-	BEGIN(STRING);
-}
+(?i:class)      {   return (CLASS); }
+(?i:else)       {   return (ELSE); }
+(?i:fi)         {   return (FI); }
+(?i:if)         {   return (IF); }
+(?i:in)         {   return (IN); }
+(?i:inherits)   {   return (INHERITS); }
+(?i:let)        {   return (LET); }
+(?i:loop)       {   return (LOOP); }
+(?i:pool)       {   return (POOL); }
+(?i:then)       {   return (THEN); }
+(?i:while)      {   return (WHILE); }
+(?i:case)       {   return (CASE); }
+(?i:esac)       {   return (ESAC); }
+(?i:of)         {   return (OF); }
+(?i:new)        {   return (NEW); }
+(?i:not)        {   return (NOT); }
+(?i:isvoid)     {   return (ISVOID); }
+
+
+ /* "For boolean constants, the semantic value is stored in the field
+  * `cool_yylval.boolean`. */
+t(?i:rue)       {   
+	                cool_yylval.boolean = true;
+	                return (BOOL_CONST);
+	            }
+f(?i:alse)      {   
+	                cool_yylval.boolean = false;
+	                return (BOOL_CONST);
+	            }
+
+
+ /* Identifiers
+  * ------------------------------------------------------------------------ */
+{TYPEID}        {
+                    cool_yylval.symbol = stringtable.add_string(yytext);
+                    return (TYPEID);
+	            }
+{OBJECTID}      {
+                    cool_yylval.symbol = stringtable.add_string(yytext);
+                    return (OBJECTID);
+	            }
+
+
+ /* String constants (C syntax)
+  * Escape sequence \c is accepted for all characters c. Except for 
+  * \n \t \b \f, the result is c.
+  * ------------------------------------------------------------------------ */
+
+\"              {
+                    BEGIN(STRING);
+                    string_length = 0;
+	            }
+<STRING>\"      {
+                    cool_yylval.symbol = stringtable.add_string(string_buf);
+                    resetStr();
+                    BEGIN(INITIAL);
+                    return (STR_CONST);
+	            }
+<STRING>\0      {
+                    setErrMsg("String contains null character");
+                    resetStr();
+                    BEGIN(STRING_ERR);
+                    return ERROR;
+	            }
+<STRING>\\\0    {
+                    setErrMsg("String contains escaped null character.");
+                    resetStr();
+                    BEGIN(STRING_ERR);
+                    return ERROR;
+	            }
+<STRING>\n      {
+                    setErrMsg("Unterminated string constant");
+                    resetStr();
+
+                    /* assume the programmer just forgot the closing " */
+                    curr_lineno++;
+                    BEGIN(INITIAL);
+                    return ERROR;
+	            }
+  /* this is an escaped backslash '\' followed by an 'n'*/
+<STRING>\\n     {
+	                /* Manually change check to handle when we are adding two to string */
+                    if (strTooLong()) { return strLenErr(); }
+                    string_length = string_length + 2;
+                    addToStr("\n");
+	            }
+ /* this is an escaped newline character  */
+<STRING>\\\n    {
+                    if (strTooLong()) { return strLenErr(); }
+                    string_length++;
+                    curr_lineno++;
+                    addToStr("\n");
+                }
+<STRING>\\t     {
+                    if (strTooLong()) { return strLenErr(); }
+                    string_length++;
+                    addToStr("\t");
+                }
+<STRING>\\b     {
+                    if (strTooLong()) { return strLenErr(); }
+                    string_length++;
+                    addToStr("\b");
+	            }
+<STRING>\\f     {
+                    if (strTooLong()) { return strLenErr(); }
+                    string_length++;
+                    addToStr("\f");
+	            }
+
+ /* All other escaped characters should just return the character. */
+<STRING>\\.     {
+                    if (strTooLong()) { return strLenErr(); }
+                    string_length++;
+                    addToStr(&strdup(yytext)[1]);
+	            }
 <STRING><<EOF>> {
-	BEGIN(INITIAL);
-	cool_yylval.error_msg = "EOF in string constant";
-	return ERROR;
-}
-<STRING>\n {
-	curr_lineno++;
-	BEGIN(INITIAL);
-	cool_yylval.error_msg = "Unterminated string constant";
-	return ERROR;
-}
-<STRING>\0 {
-	BEGIN(INITIAL);
-	cool_yylval.error_msg = "String contains null character";
-	return ERROR;
-}
-<STRING>\"	{
-	BEGIN(INITIAL);
-	*string_buf_ptr = '\0';
-	cool_yylval.symbol = stringtable.add_string(string_buf);
-	return STR_CONST;
-}
-<STRING>\\n  {
-	if ((string_buf_ptr - 1) == &string_buf[MAX_STR_CONST-1]) {
-		BEGIN(INITIAL);
-		cool_yylval.error_msg = "String constant too long";
-		return ERROR;
-	}
-	*string_buf_ptr++ = '\n';
-}
-<STRING>\\t  {
-	if ((string_buf_ptr - 1) == &string_buf[MAX_STR_CONST-1]) {
-		BEGIN(INITIAL);
-		cool_yylval.error_msg = "String constant too long";
-		return ERROR;
-	}
-	*string_buf_ptr++ = '\t';
-}
-<STRING>\\b  {
-	if ((string_buf_ptr - 1) == &string_buf[MAX_STR_CONST-1]) {
-		BEGIN(INITIAL);
-		cool_yylval.error_msg = "String constant too long";
-		return ERROR;
-	}
-	*string_buf_ptr++ = '\b';
-}
-<STRING>\\f  {
-	if ((string_buf_ptr - 1) == &string_buf[MAX_STR_CONST-1]) {
-		BEGIN(INITIAL);
-		cool_yylval.error_msg = "String constant too long";
-		return ERROR;
-	}
-	*string_buf_ptr++ = '\f';
-}
-<STRING>\\(.|\n)	{
-	if ((string_buf_ptr - 1) == &string_buf[MAX_STR_CONST-1]) {
-		BEGIN(INITIAL);
-		cool_yylval.error_msg = "String constant too long";
-		return ERROR;
-	}
-	*string_buf_ptr++ = yytext[1];
-}
-<STRING>[^\\\n\"]+ {
-	char *yptr = yytext;
-	while ( *yptr ) {
-		if ((string_buf_ptr - 1) == &string_buf[MAX_STR_CONST-1]) {
-			BEGIN(INITIAL);
-			cool_yylval.error_msg = "String constant too long";
-			return ERROR;
-		}
-		*string_buf_ptr++ = *yptr++;
-	}
-}
-{INVALID} {
-	cool_yylval.error_msg = yytext;
-	return ERROR;
-}
+	                setErrMsg("EOF in string constant");
+	                curr_lineno++;
+                    BEGIN(INITIAL);
+                    return ERROR;
+	            }
+<STRING>.       {
+                    if (strTooLong()) { return strLenErr(); }
+                    string_length++;
+                    addToStr(yytext);
+	            }
+ /* for certain in-string errors, lexing should resume at an unescaped newline
+  * or a closing " */
+<STRING_ERR>\"  {
+                    BEGIN(INITIAL);
+	            }
+<STRING_ERR>\\\n {
+	                curr_lineno++;
+                    BEGIN(INITIAL);
+                }
+<STRING_ERR>\n  {
+	                curr_lineno++;
+                    BEGIN(INITIAL);
+	            }
+<STRING_ERR>.   {}
+
+ /* eat up everything else
+  * ------------------------------------------------------------------------ */
+
+\n              {   curr_lineno++; }
+ /* Note this is *not* the same list of whitespace chars that can be escaped
+  * in a string */
+[ \f\r\t\v]     {}
+.               {   
+	                setErrMsg(yytext);
+                    return ERROR;
+                }
+
 %%
+
+
+ /* USER SUBROUTINES
+  * ======================================================================== */
+
+bool strTooLong() {
+	if (string_length + 1 >= MAX_STR_CONST) {
+		BEGIN(STRING_ERR);
+        return true;
+    }
+    return false;
+}
+
+void resetStr() {
+    string_buf[0] = '\0';
+}
+
+void setErrMsg(char* msg) {
+    cool_yylval.error_msg = msg;
+}
+
+int strLenErr() {
+	resetStr();
+    setErrMsg("String constant too long");
+    return ERROR;
+}
+
+void addToStr(char* str) {
+    strcat(string_buf, str);
+}

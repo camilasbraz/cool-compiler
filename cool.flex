@@ -1,12 +1,7 @@
 /*
- *  The scanner definition for COOL.
+ * The scanner definition for COOL.
  */
 
-/*
- *  Stuff enclosed in %{ %} in the first section is copied verbatim to the
- *  output, so headers and global definitions are placed here to be visible
- * to the code in the file.  Don't remove anything that was here initially
- */
 %{
 #include <cool-parse.h>
 #include <stringtab.h>
@@ -50,16 +45,21 @@ extern YYSTYPE cool_yylval;
 /* ensures that we properly handle nested comments */
 int comment_depth = 0;
 
-/* ensures that we do not go over Cool's 1024 char limit */ 
+/* ensures that we do not go over Cool's 1024 char limit */
 int string_length;
 
 /* forward declarations */
 bool strTooLong();
 void resetStr();
-void setErrMsg(char* msg);
-void exitStrState(char* msg);
+void setErrMsg(const char* msg);
+void exitStrState(const char* msg);
 int strLenErr();
-void addToStr(char* str);
+void addToStr(const char* str);
+
+/* Function to indicate the end of input */
+int yywrap() {
+    return 1; // Always indicate the end of input
+}
 
 %}
 
@@ -107,12 +107,12 @@ ASSIGN          <-
                         setErrMsg("EOF in comment");
                         BEGIN(INITIAL);
                         return ERROR;
-	                }
+                    }
 "*)"                {
                         setErrMsg("Unmatched *)");
                         BEGIN(INITIAL);
                         return ERROR;
-	                }
+                    }
 "--"                {   BEGIN(S_LINE_COMMENT); }
 <S_LINE_COMMENT>.   {}
 <S_LINE_COMMENT>\n  {
@@ -126,8 +126,8 @@ ASSIGN          <-
 {NUMBER}+       {
                     cool_yylval.symbol = inttable.add_string(yytext);
                     return INT_CONST;
-	            }
-{DARROW}		{   return DARROW; }
+                }
+{DARROW}        {   return DARROW; }
 {LE}            {   return LE; }
 {ASSIGN}        {   return ASSIGN; }
 "+"             {   return '+'; }
@@ -146,7 +146,6 @@ ASSIGN          <-
 "@"             {   return '@'; }
 "{"             {   return '{'; }
 "}"             {   return '}'; }
-
 
  /* Keywords
   * 
@@ -172,30 +171,27 @@ ASSIGN          <-
 (?i:not)        {   return (NOT); }
 (?i:isvoid)     {   return (ISVOID); }
 
-
  /* "For boolean constants, the semantic value is stored in the field
   * `cool_yylval.boolean`. */
 t(?i:rue)       {   
-	                cool_yylval.boolean = true;
-	                return (BOOL_CONST);
-	            }
+                    cool_yylval.boolean = true;
+                    return (BOOL_CONST);
+                }
 f(?i:alse)      {   
-	                cool_yylval.boolean = false;
-	                return (BOOL_CONST);
-	            }
-
+                    cool_yylval.boolean = false;
+                    return (BOOL_CONST);
+                }
 
  /* Identifiers
   * ------------------------------------------------------------------------ */
 {TYPEID}        {
                     cool_yylval.symbol = stringtable.add_string(yytext);
                     return (TYPEID);
-	            }
+                }
 {OBJECTID}      {
                     cool_yylval.symbol = stringtable.add_string(yytext);
                     return (OBJECTID);
-	            }
-
+                }
 
  /* String constants (C syntax)
   * Escape sequence \c is accepted for all characters c. Except for 
@@ -205,25 +201,25 @@ f(?i:alse)      {
 \"              {
                     BEGIN(STRING);
                     string_length = 0;
-	            }
+                }
 <STRING>\"      {
                     cool_yylval.symbol = stringtable.add_string(string_buf);
                     resetStr();
                     BEGIN(INITIAL);
                     return (STR_CONST);
-	            }
+                }
 <STRING>\0      {
                     setErrMsg("String contains null character");
                     resetStr();
                     BEGIN(STRING_ERR);
                     return ERROR;
-	            }
+                }
 <STRING>\\\0    {
                     setErrMsg("String contains escaped null character.");
                     resetStr();
                     BEGIN(STRING_ERR);
                     return ERROR;
-	            }
+                }
 <STRING>\n      {
                     setErrMsg("Unterminated string constant");
                     resetStr();
@@ -232,14 +228,14 @@ f(?i:alse)      {
                     curr_lineno++;
                     BEGIN(INITIAL);
                     return ERROR;
-	            }
+                }
   /* this is an escaped backslash '\' followed by an 'n'*/
 <STRING>\\n     {
-	                /* Manually change check to handle when we are adding two to string */
+                    /* Manually change check to handle when we are adding two to string */
                     if (strTooLong()) { return strLenErr(); }
                     string_length = string_length + 2;
                     addToStr("\n");
-	            }
+                }
  /* this is an escaped newline character  */
 <STRING>\\\n    {
                     if (strTooLong()) { return strLenErr(); }
@@ -256,43 +252,43 @@ f(?i:alse)      {
                     if (strTooLong()) { return strLenErr(); }
                     string_length++;
                     addToStr("\b");
-	            }
+                }
 <STRING>\\f     {
                     if (strTooLong()) { return strLenErr(); }
                     string_length++;
                     addToStr("\f");
-	            }
+                }
 
  /* All other escaped characters should just return the character. */
 <STRING>\\.     {
                     if (strTooLong()) { return strLenErr(); }
                     string_length++;
                     addToStr(&strdup(yytext)[1]);
-	            }
+                }
 <STRING><<EOF>> {
-	                setErrMsg("EOF in string constant");
-	                curr_lineno++;
+                    setErrMsg("EOF in string constant");
+                    curr_lineno++;
                     BEGIN(INITIAL);
                     return ERROR;
-	            }
+                }
 <STRING>.       {
                     if (strTooLong()) { return strLenErr(); }
                     string_length++;
                     addToStr(yytext);
-	            }
+                }
  /* for certain in-string errors, lexing should resume at an unescaped newline
   * or a closing " */
 <STRING_ERR>\"  {
                     BEGIN(INITIAL);
-	            }
+                }
 <STRING_ERR>\\\n {
-	                curr_lineno++;
+                    curr_lineno++;
                     BEGIN(INITIAL);
                 }
 <STRING_ERR>\n  {
-	                curr_lineno++;
+                    curr_lineno++;
                     BEGIN(INITIAL);
-	            }
+                }
 <STRING_ERR>.   {}
 
  /* eat up everything else
@@ -303,7 +299,7 @@ f(?i:alse)      {
   * in a string */
 [ \f\r\t\v]     {}
 .               {   
-	                setErrMsg(yytext);
+                    setErrMsg(yytext);
                     return ERROR;
                 }
 
@@ -314,8 +310,8 @@ f(?i:alse)      {
   * ======================================================================== */
 
 bool strTooLong() {
-	if (string_length + 1 >= MAX_STR_CONST) {
-		BEGIN(STRING_ERR);
+    if (string_length + 1 >= MAX_STR_CONST) {
+        BEGIN(STRING_ERR);
         return true;
     }
     return false;
@@ -325,16 +321,16 @@ void resetStr() {
     string_buf[0] = '\0';
 }
 
-void setErrMsg(char* msg) {
+void setErrMsg(const char* msg) {
     cool_yylval.error_msg = msg;
 }
 
 int strLenErr() {
-	resetStr();
+    resetStr();
     setErrMsg("String constant too long");
     return ERROR;
 }
 
-void addToStr(char* str) {
+void addToStr(const char* str) {
     strcat(string_buf, str);
 }
