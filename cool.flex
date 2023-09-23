@@ -329,7 +329,7 @@ void resetStr() {
     string_buf[0] = '\0';
 }
 
-void setErrMsg(const char* msg) {
+void setErrMsg(char* msg) {
     cool_yylval.error_msg = msg;
 }
 
