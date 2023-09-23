@@ -103,7 +103,7 @@ not              { return NOT; }
 {FALSE}          { cool_yylval.boolean = false; return BOOL_CONST; }
 
  /*
-  * Identifiers for Ints, Types and Objects
+  * Identifiers for Ints, Types, and Objects
   */
 {INT_CONST}      {
                   cool_yylval.symbol = inttable.add_string(yytext);
@@ -130,15 +130,15 @@ not              { return NOT; }
                   cool_yylval.error_msg = yytext;
                   return ERROR;
                 }
+
 /*
  * All Comments handled here
  */
 "--".*           { /* Ignore single-line comments */ }
-"(*"             { comm = 1; BEGIN(comment); }
+"\\(\\*"         { comm = 1; BEGIN(comment); }
 
-<comment>"*)".* { /* Ignore comment content */ }
-<comment>"*)"    { if (--comm == 0) BEGIN(INITIAL); }
-<comment>\n      { curr_lineno++; }
+<comment>\\*\\)  { if (--comm == 0) BEGIN(INITIAL); }
+<comment>\\n     { curr_lineno++; }
 
 <COMMENT><<EOF>> { BEGIN(INITIAL); cool_yylval.error_msg = "EOF in comment."; return ERROR; }
 
@@ -152,35 +152,35 @@ not              { return NOT; }
 "\""             { BEGIN(string); string_buf_ptr = string_buf; }
 <string>"\""    {
                   if (string_buf_ptr - string_buf > MAX_STR_CONST - 1) {
-                    *string_buf = '\0';
+                    *string_buf = '\\0';
                     return maxStrLength();
                   }
-                  *string_buf_ptr = '\0';
+                  *string_buf_ptr = '\\0';
                   cool_yylval.symbol = stringtable.add_string(string_buf);
                   BEGIN(INITIAL);
                   return STR_CONST;
                 }
 <string><<EOF>>  { BEGIN(INITIAL); cool_yylval.error_msg = "EOF in string constant."; return ERROR; }
-<string>\0        { *string_buf = '\0'; BEGIN(escape); cool_yylval.error_msg = "String contains null character."; return ERROR; }
-<string>\n        { *string_buf = '\0'; BEGIN(INITIAL); cool_yylval.error_msg = "Unterminated string constant."; return ERROR; }
-<string>"\\n"     { *string_buf_ptr++ = '\n'; }
-<string>"\\t"     { *string_buf_ptr++ = '\t'; }
-<string>"\\b"     { *string_buf_ptr++ = '\b'; }
-<string>"\\f"     { *string_buf_ptr++ = '\f'; }
-<string>"\\\\[^\\0]" { *string_buf_ptr++ = yytext[1]; }
+<string>\\0       { *string_buf = '\\0'; BEGIN(escape); cool_yylval.error_msg = "String contains null character."; return ERROR; }
+<string>\\n       { *string_buf = '\\0'; BEGIN(INITIAL); cool_yylval.error_msg = "Unterminated string constant."; return ERROR; }
+<string>"\\\\n"  { *string_buf_ptr++ = '\\n'; }
+<string>"\\\\t"  { *string_buf_ptr++ = '\\t'; }
+<string>"\\\\b"  { *string_buf_ptr++ = '\\b'; }
+<string>"\\\\f"  { *string_buf_ptr++ = '\\f'; }
+<string>"\\\\\\\\[^\\0]" { *string_buf_ptr++ = yytext[1]; }
 <string>.         { *string_buf_ptr++ = *yytext; }
 
-<escape>[\n"]    { BEGIN(INITIAL); }
-<escape>[^\n"]   { *string_buf_ptr++ = yytext[1]; }
+<escape>\\[\\n"] { BEGIN(INITIAL); }
+<escape>[^\\n"]  { *string_buf_ptr++ = yytext[1]; }
 
  /*
   * Skip all Whitespace characters
   */
-\n               { curr_lineno++; }
+\\n               { curr_lineno++; }
 {WHITESPACE}+    { }
 
  /*
-  * When nothing matches report error text
+  * When nothing matches, report error text
   */
 .                { cool_yylval.error_msg = yytext; return ERROR; }
 
