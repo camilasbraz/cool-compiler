@@ -195,10 +195,6 @@ STR_CONST_DELIMITER              \"
     else if (strcasecmp(yytext, "new") == 0) return NEW;
     else if (strcasecmp(yytext, "isvoid") == 0) return ISVOID;
     else if (strcasecmp(yytext, "not") == 0) return NOT;
-    else {
-        cool_yylval.symbol = idtable.add_string(yytext);
-        return OBJECTID;
-    }
 }
 
 /* Operators and Punctuation */
