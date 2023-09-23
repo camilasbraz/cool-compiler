@@ -57,9 +57,17 @@ int strLenErr();
 void addToStr(char* str);
 
 /* Function to indicate the end of input */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int yywrap() {
     return 1; // Always indicate the end of input
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 %}
 
