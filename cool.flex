@@ -168,45 +168,43 @@ STR_CONST_DELIMITER              \"
 {LE}     return(LE);
 {ASSIGN} return(ASSIGN);
 
- /*
-  * Keywords are case-insensitive except for the values true and false,
-  * which must begin with a lower-case letter.
-  */
+ /* Keywords */
+[[:alpha:]][[:alnum:]_]* {
+    if (strcasecmp(yytext, "true") == 0) {
+        cool_yylval.boolean = true;
+        return BOOL_CONST;
+    }
+    else if (strcasecmp(yytext, "false") == 0) {
+        cool_yylval.boolean = false;
+        return BOOL_CONST;
+    }
+    else if (strcasecmp(yytext, "class") == 0) return CLASS;
+    else if (strcasecmp(yytext, "else") == 0) return ELSE;
+    else if (strcasecmp(yytext, "fi") == 0) return FI;
+    else if (strcasecmp(yytext, "if") == 0) return IF;
+    else if (strcasecmp(yytext, "in") == 0) return IN;
+    else if (strcasecmp(yytext, "inherits") == 0) return INHERITS;
+    else if (strcasecmp(yytext, "let") == 0) return LET;
+    else if (strcasecmp(yytext, "loop") == 0) return LOOP;
+    else if (strcasecmp(yytext, "pool") == 0) return POOL;
+    else if (strcasecmp(yytext, "then") == 0) return THEN;
+    else if (strcasecmp(yytext, "while") == 0) return WHILE;
+    else if (strcasecmp(yytext, "case") == 0) return CASE;
+    else if (strcasecmp(yytext, "esac") == 0) return ESAC;
+    else if (strcasecmp(yytext, "of") == 0) return OF;
+    else if (strcasecmp(yytext, "new") == 0) return NEW;
+    else if (strcasecmp(yytext, "isvoid") == 0) return ISVOID;
+    else if (strcasecmp(yytext, "not") == 0) return NOT;
+    else {
+        cool_yylval.symbol = idtable.add_string(yytext);
+        return OBJECTID;
+    }
+}
 
-{CLASS}     return (CLASS);
-{ELSE}      return (ELSE);
-{FI}        return (FI);
-{IF}        return (IF);
-{IN}        return (IN);
-{INHERITS}  return (INHERITS);
-{LET}       return (LET);
-{LOOP}      return (LOOP);
-{POOL}      return (POOL);
-{THEN}      return (THEN);
-{WHILE}     return (WHILE);
-{CASE}      return (CASE);
-{ESAC}      return (ESAC);
-{OF}        return (OF);
-{NEW}       return (NEW);
-{ISVOID}    return (ISVOID);
-{NOT}       return (NOT);
-
-"+"         return '+';
-"-"         return '-';
-"*"         return '*';
-"/"         return '/';
-"~"         return '~';
-"<"         return '<';
-"="         return '=';
-"("         return '(';
-")"         return ')';
-"{"         return '{';
-"}"         return '}';
-";"         return ';';
-":"         return ':';
-"."         return '.';
-","         return ',';
-"@"         return '@';
+/* Operators and Punctuation */
+"+" | "-" | "*" | "/" | "~" | "<" | "=" | "(" | ")" | "{" | "}" | ";" | ":" | "." | "," | "@" {
+    return yytext[0];
+}
 
 \n {
  curr_lineno++; 
