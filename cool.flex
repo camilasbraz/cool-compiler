@@ -147,15 +147,23 @@ STR_CONST_DELIMITER              \"
 }
 
 <NESTED_COMMENT><<EOF>> {
-    if (error_found)
-      yyterminate();
-      
-    cool_yylval.error_msg = "EOF in comment";
-    error_found = 1;
-    return (ERROR);
+    if (error_found) {
+        yyterminate();
+    } else {
+        cool_yylval.error_msg = "EOF in comment";
+        error_found = 1;
+        return (ERROR);
+    }
 }
-<NESTED_COMMENT>\n        { curr_lineno++; }
-<NESTED_COMMENT>.         {  }
+
+
+<NESTED_COMMENT>\n { 
+  curr_lineno++; 
+}
+
+<NESTED_COMMENT>.{  
+
+}
 
 {NESTED_COMMENT_END} {
   if (!in_nested_comment) {
@@ -215,7 +223,9 @@ STR_CONST_DELIMITER              \"
  curr_lineno++; 
 }
 
-{BLANK}+ {}
+{BLANK}+ {
+
+}
 
 {BOOL_CONST_TRUE} {
   cool_yylval.boolean = true;
@@ -346,7 +356,11 @@ STR_CONST_DELIMITER              \"
     }
 }
 
-<ESCAPE>[\n|"]	 { BEGIN(INITIAL);  }
-<ESCAPE>[^\n|"]	 { }
+<ESCAPE>[\n|"] {
+   BEGIN(INITIAL);
+}
+<ESCAPE>[^\n|"]	 { 
+  
+}
 
 %%
