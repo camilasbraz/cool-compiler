@@ -67,11 +67,17 @@ int string_size = 0;
  * Define names for regular expressions here.
  */
 
-DIGIT               [0-9]
-LOWERCASE_LETTER    [a-z]
-UPPERCASE_LETTER    [A-Z]
-LETTER              ({LOWERCASE_LETTER}|{UPPERCASE_LETTER})
-BLANK               (" "|\f|\r|\t|\v)
+NUMBER          [0-9]
+ALPHANUMERIC    [a-zA-Z0-9_]
+TYPEID          [A-Z]{ALPHANUMERIC}*
+OBJECTID        [a-z]{ALPHANUMERIC}*
+DARROW          =>
+LE              <=
+ASSIGN          <-
+
+{DARROW}		{   return DARROW; }
+{LE}            {   return LE; }
+{ASSIGN}        {   return ASSIGN; }
 
 CLASS       (?i:class)
 ELSE        (?i:else)
@@ -90,10 +96,6 @@ OF          (?i:of)
 NEW         (?i:new)
 ISVOID      (?i:isvoid)
 NOT         (?i:not)
-
-DARROW        "=>"
-LE            "<="
-ASSIGN        "<-"
 
 
 INT_CONST        {DIGIT}+
