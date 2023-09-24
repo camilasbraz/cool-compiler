@@ -160,8 +160,7 @@ STR_CONST_DELIMITER              \"
   curr_lineno++; 
 }
 
-<NESTED_COMMENT>.{  
-
+<NESTED_COMMENT>. {
 }
 
 {NESTED_COMMENT_END} {
