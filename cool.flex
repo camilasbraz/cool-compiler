@@ -147,12 +147,12 @@ STR_CONST_DELIMITER              \"
 }
 
 <NESTED_COMMENT><<EOF>> {
-    if (!in_nested_comment) {
-        cool_yylval.error_msg = "EOF in comment";
-        error_found = 1;
-        return (ERROR);
-    }
-    // Continue processando EOF dentro do comentário aninhado, se necessário
+    if (error_found)
+      yyterminate();
+      
+    cool_yylval.error_msg = "EOF in comment";
+    error_found = 1;
+    return (ERROR);
 }
 
 
