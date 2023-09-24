@@ -143,11 +143,11 @@ STR_CONST_DELIMITER              \"
 "+"             {   return '+'; }
 "/"             {   return '/'; }
 "-"             {   return '-'; }
-""             {   return ''; }
+"*"             {   return '*'; }
 "="             {   return '='; }
 "<"             {   return '<'; }
 "."             {   return '.'; }
-""             {   return ''; }
+"~"             {   return '~'; }
 ","             {   return ','; }
 ";"             {   return ';'; }
 ":"             {   return ':'; }
@@ -156,7 +156,6 @@ STR_CONST_DELIMITER              \"
 "@"             {   return '@'; }
 "{"             {   return '{'; }
 "}"             {   return '}'; }
-
 
 (?i:class)      {   return (CLASS); }
 (?i:else)       {   return (ELSE); }
