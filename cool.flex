@@ -45,10 +45,6 @@ extern int verbose_flag;
 
 extern YYSTYPE cool_yylval;
 
-/*
- *  Add Your own definitions here
- */
-
 int comment_size = 0;
 int comment_nested = 0;
 int error_flag = 0;
@@ -62,10 +58,6 @@ int string_size = 0;
 %x ESCAPE
 %x NESTED_COMMENT
 %x SIMPLE_COMMENT
-
-/*
- * Define names for regular expressions here.
- */
 
 
 DIGIT               [0-9]
@@ -93,9 +85,6 @@ SIMPLE_COMMENT_START   "--"
 STR_CONST_DELIMITER              \"
 %%
 
- /*
-  *  Simple and nested comments
-  */
 
 {SIMPLE_COMMENT_START} { BEGIN(SIMPLE_COMMENT); }
 <SIMPLE_COMMENT>\n        { curr_lineno++; BEGIN(INITIAL); }
@@ -133,12 +122,6 @@ STR_CONST_DELIMITER              \"
 	  return (ERROR);
   }
 }
-
-
- /*
-  * Keywords are case-insensitive except for the values true and false,
-  * which must begin with a lower-case letter.
-  */
 
 "+"             {   return '+'; }
 "/"             {   return '/'; }
@@ -208,13 +191,6 @@ STR_CONST_DELIMITER              \"
   cool_yylval.symbol = inttable.add_string(yytext);
   return (OBJECTID);
 }
-
- /*
-  *  String constants (C syntax)
-  *  Escape sequence \c is accepted for all characters c. Except for 
-  *  \n \t \b \f, the result is c.
-  *
-  */
 
 
 {STR_CONST_DELIMITER}  { BEGIN(STRING_CONSTANT); }
