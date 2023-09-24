@@ -62,26 +62,29 @@ int in_nested_comment = 0;
 %x NESTED_COMMENT
 %x SIMPLE_COMMENT
 
+/*
+ * Define names for regular expressions here.
+ */
 DARROW        "=>"
 LE            "<="
 ASSIGN        "<-"
 
-THEN        (?i:then)
-WHILE       (?i:while)
-CASE        (?i:case)
-CLASS       (?i:class)
-ELSE        (?i:else)
 FI          (?i:fi)
+POOL        (?i:pool)
+CLASS       (?i:class)
+THEN        (?i:then)
+ELSE        (?i:else)
+NEW         (?i:new)
+ISVOID      (?i:isvoid)
 NOT         (?i:not)
-LOOP        (?i:loop)
+CASE        (?i:case)
+ESAC        (?i:esac)
+WHILE       (?i:while)
 IF          (?i:if)
 IN          (?i:in)
 INHERITS    (?i:inherits)
 LET         (?i:let)
-POOL        (?i:pool)
-NEW         (?i:new)
-ISVOID      (?i:isvoid)
-ESAC        (?i:esac)
+LOOP        (?i:loop)
 OF          (?i:of)
 
 DIGIT               [0-9]
@@ -107,27 +110,28 @@ STR_CONST_DELIMITER              \"
   *  Simple and nested comments
   */
 
-"--".* {
-  /* This matches a simple comment starting with "--" and extends to the end of the line. */
-  curr_lineno++;
-  BEGIN(INITIAL);
+{SIMPLE_COMMENT_START} {
+    BEGIN(SIMPLE_COMMENT);
 }
 
-"(*" {
-  comment_depth++;
-  BEGIN(NESTED_COMMENT);
-  in_nested_comment = 1;
+<SIMPLE_COMMENT>. {
+    // Ignorar caracteres dentro de comentário simples
 }
 
-<NESTED_COMMENT>"(*" {
-  comment_depth++;
+<SIMPLE_COMMENT>\n {
+    curr_lineno++;
+    BEGIN(INITIAL);
 }
 
-<NESTED_COMMENT>"*)" {
+
+{NESTED_COMMENT_START} { comment_depth++; BEGIN(NESTED_COMMENT); in_nested_comment = 1; }
+<NESTED_COMMENT>{NESTED_COMMENT_START} { comment_depth++; }
+<NESTED_COMMENT>{NESTED_COMMENT_END} {
   comment_depth--;
+
   if (comment_depth < 0) {
     cool_yylval.error_msg = "Unmatched *)";
-    return (ERROR);
+	  return (ERROR);
   }
 
   if (comment_depth == 0) {
@@ -135,27 +139,24 @@ STR_CONST_DELIMITER              \"
     BEGIN(INITIAL);
   }
 }
-
 <NESTED_COMMENT><<EOF>> {
-  if (error_found) {
-    yyterminate();
-  } else {
+    if (error_found)
+      yyterminate();
+      
     cool_yylval.error_msg = "EOF in comment";
     error_found = 1;
     return (ERROR);
-  }
 }
-
 <NESTED_COMMENT>\n        { curr_lineno++; }
-
-<NESTED_COMMENT>.         { }
+<NESTED_COMMENT>.         {  }
 
 {NESTED_COMMENT_END} {
   if (!in_nested_comment) {
     cool_yylval.error_msg = "Unmatched *)";
-    return (ERROR);
+	  return (ERROR);
   }
 }
+
   /*
   *  The single and double character operators.
   */
