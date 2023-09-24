@@ -147,13 +147,12 @@ STR_CONST_DELIMITER              \"
 }
 
 <NESTED_COMMENT><<EOF>> {
-    if (error_found) {
-        yyterminate();
-    } else {
+    if (!in_nested_comment) {
         cool_yylval.error_msg = "EOF in comment";
         error_found = 1;
         return (ERROR);
     }
+    // Continue processando EOF dentro do comentário aninhado, se necessário
 }
 
 
@@ -166,10 +165,11 @@ STR_CONST_DELIMITER              \"
 }
 
 {NESTED_COMMENT_END} {
-  if (!in_nested_comment) {
-    cool_yylval.error_msg = "Unmatched *)";
-	  return (ERROR);
-  }
+    if (comment_depth == 0) {
+        cool_yylval.error_msg = "Unmatched *)";
+        return (ERROR);
+    }
+    comment_depth--;
 }
 
   /*
@@ -360,7 +360,7 @@ STR_CONST_DELIMITER              \"
    BEGIN(INITIAL);
 }
 <ESCAPE>[^\n|"]	 { 
-  
+
 }
 
 %%
