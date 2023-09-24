@@ -73,23 +73,23 @@ UPPERCASE_LETTER    [A-Z]
 LETTER              ({LOWERCASE_LETTER}|{UPPERCASE_LETTER})
 BLANK               (" "|\f|\r|\t|\v)
 
-(?i:class)      {   return (CLASS); }
-(?i:else)       {   return (ELSE); }
-(?i:fi)         {   return (FI); }
-(?i:if)         {   return (IF); }
-(?i:in)         {   return (IN); }
-(?i:inherits)   {   return (INHERITS); }
-(?i:let)        {   return (LET); }
-(?i:loop)       {   return (LOOP); }
-(?i:pool)       {   return (POOL); }
-(?i:then)       {   return (THEN); }
-(?i:while)      {   return (WHILE); }
-(?i:case)       {   return (CASE); }
-(?i:esac)       {   return (ESAC); }
-(?i:of)         {   return (OF); }
-(?i:new)        {   return (NEW); }
-(?i:not)        {   return (NOT); }
-(?i:isvoid)     {   return (ISVOID); }
+CLASS       (?i:class)
+ELSE        (?i:else)
+FI          (?i:fi)
+IF          (?i:if)
+IN          (?i:in)
+INHERITS    (?i:inherits)
+LET         (?i:let)
+LOOP        (?i:loop)
+POOL        (?i:pool)
+THEN        (?i:then)
+WHILE       (?i:while)
+CASE        (?i:case)
+ESAC        (?i:esac)
+OF          (?i:of)
+NEW         (?i:new)
+ISVOID      (?i:isvoid)
+NOT         (?i:not)
 
 DARROW        "=>"
 LE            "<="
@@ -161,6 +161,24 @@ STR_CONST_DELIMITER              \"
   * Keywords are case-insensitive except for the values true and false,
   * which must begin with a lower-case letter.
   */
+
+{CLASS}     return (CLASS);
+{ELSE}      return (ELSE);
+{FI}        return (FI);
+{IF}        return (IF);
+{IN}        return (IN);
+{INHERITS}  return (INHERITS);
+{LET}       return (LET);
+{LOOP}      return (LOOP);
+{POOL}      return (POOL);
+{THEN}      return (THEN);
+{WHILE}     return (WHILE);
+{CASE}      return (CASE);
+{ESAC}      return (ESAC);
+{OF}        return (OF);
+{NEW}       return (NEW);
+{ISVOID}    return (ISVOID);
+{NOT}       return (NOT);
 
 "+"         return '+';
 "-"         return '-';
