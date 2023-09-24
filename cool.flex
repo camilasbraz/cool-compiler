@@ -66,23 +66,23 @@ DARROW        "=>"
 LE            "<="
 ASSIGN        "<-"
 
-(?i:class)      return CLASS;
-(?i:else)       return ELSE;
-(?i:while)      return WHILE;
-(?i:case)       return CASE;
-(?i:loop)       return LOOP;
-(?i:new)        return NEW;
-(?i:isvoid)     return ISVOID;
-(?i:not)        return NOT;
-(?i:pool)       return POOL;
-(?i:then)       return THEN;
-(?i:fi)         return FI;
-(?i:if)         return IF;
-(?i:in)         return IN;
-(?i:inherits)   return INHERITS;
-(?i:esac)       return ESAC;
-(?i:of)         return OF;
-(?i:let)        return LET;
+THEN        (?i:then)
+WHILE       (?i:while)
+CASE        (?i:case)
+CLASS       (?i:class)
+ELSE        (?i:else)
+FI          (?i:fi)
+NOT         (?i:not)
+LOOP        (?i:loop)
+IF          (?i:if)
+IN          (?i:in)
+INHERITS    (?i:inherits)
+LET         (?i:let)
+POOL        (?i:pool)
+NEW         (?i:new)
+ISVOID      (?i:isvoid)
+ESAC        (?i:esac)
+OF          (?i:of)
 
 DIGIT               [0-9]
 LOWERCASE_LETTER    [a-z]
