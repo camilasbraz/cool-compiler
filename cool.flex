@@ -62,47 +62,29 @@ int in_nested_comment = 0;
 %x NESTED_COMMENT
 %x SIMPLE_COMMENT
 
+
+
 DARROW        "=>"
-{DARROW} return(DARROW);
 LE            "<="
-{LE}     return(LE);
 ASSIGN        "<-"
-{ASSIGN} return(ASSIGN);
 
 FI          (?i:fi)
-{FI}        return (FI);
 POOL        (?i:pool)
-{POOL}      return (POOL);
 CLASS       (?i:class)
-{CLASS}     return (CLASS);
 THEN        (?i:then)
-{THEN}      return (THEN);
 ELSE        (?i:else)
-{ELSE}      return (ELSE);
 NEW         (?i:new)
-{NEW}       return (NEW);
 ISVOID      (?i:isvoid)
-{ISVOID}    return (ISVOID);
 NOT         (?i:not)
-{NOT}       return (NOT);
 CASE        (?i:case)
-{CASE}      return (CASE);
 ESAC        (?i:esac)
-{ESAC}      return (ESAC);
 WHILE       (?i:while)
-{WHILE}     return (WHILE);
 IF          (?i:if)
-{IF}        return (IF);
 IN          (?i:in)
-{IN}        return (IN);
 INHERITS    (?i:inherits)
-{INHERITS}  return (INHERITS);
 LET         (?i:let)
-{LET}       return (LET);
 LOOP        (?i:loop)
-{LOOP}      return (LOOP);
 OF          (?i:of)
-{OF}        return (OF);
 
 DIGIT               [0-9]
 LOWERCASE_LETTER    [a-z]
@@ -119,23 +101,6 @@ OBJECTID         ("self"|{LETTER}({LETTER}|{DIGIT}|"_")*)
 NESTED_COMMENT_START   "(*"
 NESTED_COMMENT_END     "*)"
 SIMPLE_COMMENT_START   "--"
-
-"+"         return '+';
-"-"         return '-';
-"*"         return '*';
-"/"         return '/';
-"~"         return '~';
-"<"         return '<';
-"="         return '=';
-"("         return '(';
-")"         return ')';
-"{"         return '{';
-"}"         return '}';
-";"         return ';';
-":"         return ':';
-"."         return '.';
-","         return ',';
-"@"         return '@';
 
 STR_CONST_DELIMITER              \"
 %%
