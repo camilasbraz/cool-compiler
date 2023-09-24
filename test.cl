@@ -125,23 +125,6 @@ class Main {
    
     main() : SELF_TYPE {
         {
-            1
-            -1
-            1234567
-            FFFFF
-            FF__FFF
-            Y4896
-            9634qq
-            023112
-            -- ooooo 
-            ( * laaaa * )
-            (* dsahdo *)
-            ccc *)  -- should accuse unmatched *)
-            "string"
-            "string teste"
-            "if else if else"
-            "if"
-            "66$#@!!7*"
             false
             FALSE
             falsE
@@ -150,6 +133,23 @@ class Main {
             trUE
             True
             TRUE
+            1234567
+            FFFFF
+            FF__FFF
+            Y4896
+            9634qq
+            023112
+            1
+            -1
+            "if else if else"
+            "if"
+            -- ooooo 
+            ( * laaaa * )
+            (* dsahdo *)
+            ccc *)  -- should accuse unmatched *)
+            "string teste"
+            "string"
+            "66$#@!!7*"
             ABC-def
             if else fi
             "a \" -- should have a string without termination error
@@ -167,13 +167,17 @@ class Main {
             "\n"
             \n
             \f
+            \t
             =>
             \0
-            \t
             \\n
             (* 
                 comentario!
                 *)
+
+            (* 
+                Outro comentario!!
+            *)
             cells <- (new CellularAutomaton).init("         X         ");
             cells.print();
             (let countdown : Int <- 20 in
