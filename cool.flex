@@ -1,4 +1,4 @@
-/*
+[12:12, 24/09/2023] Pedro Robles Elétrica: /*
  *  The scanner definition for COOL.
  */
 
@@ -182,7 +182,35 @@ INT_CONST		[0-9]+
 <STRING>"\\t"		*string_buf_ptr++ = '\t';
 <STRING>"\\b"		*string_buf_ptr++ = '\b';
 <STRING>"\\f"		*string_buf_ptr++ = '\f';
-<STRING>"\\"[^\0]	*string_buf_ptr++ = yytext[1];
+<STRING>"\\\\"[^\0]	*string_buf_ptr++ = yytext[2];
+[12:12, 24/09/2023] Pedro Robles Elétrica: <STRING>"\\"[^\0]	*string_buf_ptr++ = yytext[1];
+<STRING>.		*string_buf_ptr++ = *yytext;
+
+<ESCAPE>[\n\"]	BEGIN(INITIAL);
+<ESCAPE>[^\n\"]	*string_buf_ptr++ = yytext[0];
+
+ /*
+  * Skip all Whitespace characters
+  */
+\n		curr_lineno++;
+{WHITESPACE}+
+
+ /*
+  * When nothing matches, report error text
+  */
+.		{
+			cool_yylval.error_msg = yytext;
+			return ERROR;
+		}
+
+%%
+
+int maxStrLength() {
+    cool_yylval.error_msg = "String constant too long";
+	BEGIN(ESCAPE);
+	return ERROR;
+}
+[12:15, 24/09/2023] Pedro Robles Elétrica: <STRING>"\\"[^\0]	*string_buf_ptr++ = yytext[1];
 <STRING>.		*string_buf_ptr++ = *yytext;
 
 <ESCAPE>[\n\"]	BEGIN(INITIAL);
