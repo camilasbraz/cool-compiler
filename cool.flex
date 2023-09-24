@@ -79,11 +79,6 @@ LE              <=
 ASSIGN          <-
 
 
-{DARROW}		{   return DARROW; }
-{LE}            {   return LE; }
-{ASSIGN}        {   return ASSIGN; }
-
-
 INT_CONST        {DIGIT}+
 BOOL_CONST_TRUE  (t)(?i:rue)
 BOOL_CONST_FALSE (f)(?i:alse)
@@ -181,6 +176,9 @@ STR_CONST_DELIMITER              \"
 (?i:not)        {   return (NOT); }
 (?i:isvoid)     {   return (ISVOID); }
 
+{DARROW}		{   return DARROW; }
+{LE}            {   return LE; }
+{ASSIGN}        {   return ASSIGN; }
 
 \n {
  curr_lineno++; 
