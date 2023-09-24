@@ -62,8 +62,9 @@ int in_nested_comment = 0;
 %x NESTED_COMMENT
 %x SIMPLE_COMMENT
 
-
-
+/*
+ * Define names for regular expressions here.
+ */
 DARROW        "=>"
 LE            "<="
 ASSIGN        "<-"
@@ -170,6 +171,46 @@ STR_CONST_DELIMITER              \"
     comment_depth--;
 }
 
+
+{DARROW} return(DARROW);
+{LE}     return(LE);
+{ASSIGN} return(ASSIGN);
+
+
+{CLASS}     return (CLASS);
+{ELSE}      return (ELSE);
+{FI}        return (FI);
+{IF}        return (IF);
+{IN}        return (IN);
+{INHERITS}  return (INHERITS);
+{LET}       return (LET);
+{LOOP}      return (LOOP);
+{POOL}      return (POOL);
+{THEN}      return (THEN);
+{WHILE}     return (WHILE);
+{CASE}      return (CASE);
+{ESAC}      return (ESAC);
+{OF}        return (OF);
+{NEW}       return (NEW);
+{ISVOID}    return (ISVOID);
+{NOT}       return (NOT);
+
+"+"         return '+';
+"-"         return '-';
+"*"         return '*';
+"/"         return '/';
+"~"         return '~';
+"<"         return '<';
+"="         return '=';
+"("         return '(';
+")"         return ')';
+"{"         return '{';
+"}"         return '}';
+";"         return ';';
+":"         return ':';
+"."         return '.';
+","         return ',';
+"@"         return '@';
 
 \n {
  curr_lineno++; 
