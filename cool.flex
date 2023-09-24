@@ -62,38 +62,33 @@ int in_nested_comment = 0;
 %x NESTED_COMMENT
 %x SIMPLE_COMMENT
 
-/*
- * Define names for regular expressions here.
- */
+DARROW        "=>"
+LE            "<="
+ASSIGN        "<-"
+
+(?i:class)      return CLASS;
+(?i:else)       return ELSE;
+(?i:while)      return WHILE;
+(?i:case)       return CASE;
+(?i:loop)       return LOOP;
+(?i:new)        return NEW;
+(?i:isvoid)     return ISVOID;
+(?i:not)        return NOT;
+(?i:pool)       return POOL;
+(?i:then)       return THEN;
+(?i:fi)         return FI;
+(?i:if)         return IF;
+(?i:in)         return IN;
+(?i:inherits)   return INHERITS;
+(?i:esac)       return ESAC;
+(?i:of)         return OF;
+(?i:let)        return LET;
 
 DIGIT               [0-9]
 LOWERCASE_LETTER    [a-z]
 UPPERCASE_LETTER    [A-Z]
 LETTER              ({LOWERCASE_LETTER}|{UPPERCASE_LETTER})
 BLANK               (" "|\f|\r|\t|\v)
-
-CLASS       (?i:class)
-ELSE        (?i:else)
-FI          (?i:fi)
-IF          (?i:if)
-IN          (?i:in)
-INHERITS    (?i:inherits)
-LET         (?i:let)
-LOOP        (?i:loop)
-POOL        (?i:pool)
-THEN        (?i:then)
-WHILE       (?i:while)
-CASE        (?i:case)
-ESAC        (?i:esac)
-OF          (?i:of)
-NEW         (?i:new)
-ISVOID      (?i:isvoid)
-NOT         (?i:not)
-
-DARROW        "=>"
-LE            "<="
-ASSIGN        "<-"
-
 
 INT_CONST        {DIGIT}+
 BOOL_CONST_TRUE  (t)(?i:rue)
