@@ -84,43 +84,6 @@ ASSIGN          <-
 {ASSIGN}        {   return ASSIGN; }
 
 
-"+"             {   return '+'; }
-"/"             {   return '/'; }
-"-"             {   return '-'; }
-""             {   return ''; }
-"="             {   return '='; }
-"<"             {   return '<'; }
-"."             {   return '.'; }
-""             {   return ''; }
-","             {   return ','; }
-";"             {   return ';'; }
-":"             {   return ':'; }
-"("             {   return '('; }
-")"             {   return ')'; }
-"@"             {   return '@'; }
-"{"             {   return '{'; }
-"}"             {   return '}'; }
-
-
-(?i:class)      {   return (CLASS); }
-(?i:else)       {   return (ELSE); }
-(?i:fi)         {   return (FI); }
-(?i:if)         {   return (IF); }
-(?i:in)         {   return (IN); }
-(?i:inherits)   {   return (INHERITS); }
-(?i:let)        {   return (LET); }
-(?i:loop)       {   return (LOOP); }
-(?i:pool)       {   return (POOL); }
-(?i:then)       {   return (THEN); }
-(?i:while)      {   return (WHILE); }
-(?i:case)       {   return (CASE); }
-(?i:esac)       {   return (ESAC); }
-(?i:of)         {   return (OF); }
-(?i:new)        {   return (NEW); }
-(?i:not)        {   return (NOT); }
-(?i:isvoid)     {   return (ISVOID); }
-
-
 INT_CONST        {DIGIT}+
 BOOL_CONST_TRUE  (t)(?i:rue)
 BOOL_CONST_FALSE (f)(?i:alse)
@@ -181,6 +144,42 @@ STR_CONST_DELIMITER              \"
   * Keywords are case-insensitive except for the values true and false,
   * which must begin with a lower-case letter.
   */
+
+"+"             {   return '+'; }
+"/"             {   return '/'; }
+"-"             {   return '-'; }
+""             {   return ''; }
+"="             {   return '='; }
+"<"             {   return '<'; }
+"."             {   return '.'; }
+""             {   return ''; }
+","             {   return ','; }
+";"             {   return ';'; }
+":"             {   return ':'; }
+"("             {   return '('; }
+")"             {   return ')'; }
+"@"             {   return '@'; }
+"{"             {   return '{'; }
+"}"             {   return '}'; }
+
+
+(?i:class)      {   return (CLASS); }
+(?i:else)       {   return (ELSE); }
+(?i:fi)         {   return (FI); }
+(?i:if)         {   return (IF); }
+(?i:in)         {   return (IN); }
+(?i:inherits)   {   return (INHERITS); }
+(?i:let)        {   return (LET); }
+(?i:loop)       {   return (LOOP); }
+(?i:pool)       {   return (POOL); }
+(?i:then)       {   return (THEN); }
+(?i:while)      {   return (WHILE); }
+(?i:case)       {   return (CASE); }
+(?i:esac)       {   return (ESAC); }
+(?i:of)         {   return (OF); }
+(?i:new)        {   return (NEW); }
+(?i:not)        {   return (NOT); }
+(?i:isvoid)     {   return (ISVOID); }
 
 
 \n {
