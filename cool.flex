@@ -123,15 +123,21 @@ STR_CONST_DELIMITER              \"
     BEGIN(INITIAL);
 }
 
+{NESTED_COMMENT_START} {
+    comment_depth++;
+    BEGIN(NESTED_COMMENT);
+}
 
-{NESTED_COMMENT_START} { comment_depth++; BEGIN(NESTED_COMMENT); in_nested_comment = 1; }
-<NESTED_COMMENT>{NESTED_COMMENT_START} { comment_depth++; }
+<NESTED_COMMENT>{NESTED_COMMENT_START} {
+    comment_depth++;
+}
+
 <NESTED_COMMENT>{NESTED_COMMENT_END} {
-  comment_depth--;
-
-  if (comment_depth < 0) {
+  if (comment_depth > 0) {
+    comment_depth--;
+  } else {
     cool_yylval.error_msg = "Unmatched *)";
-	  return (ERROR);
+    return (ERROR);
   }
 
   if (comment_depth == 0) {
@@ -139,6 +145,7 @@ STR_CONST_DELIMITER              \"
     BEGIN(INITIAL);
   }
 }
+
 <NESTED_COMMENT><<EOF>> {
     if (error_found)
       yyterminate();
