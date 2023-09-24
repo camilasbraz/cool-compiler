@@ -62,30 +62,27 @@ int in_nested_comment = 0;
 %x NESTED_COMMENT
 %x SIMPLE_COMMENT
 
-/*
- * Define names for regular expressions here.
- */
-DARROW        "=>"
-LE            "<="
-ASSIGN        "<-"
+(?i:=>)   return DARROW;
+(?i:<=)   return LE;
+(?i:<-)   return ASSIGN;
 
-FI          (?i:fi)
-POOL        (?i:pool)
-CLASS       (?i:class)
-THEN        (?i:then)
-ELSE        (?i:else)
-NEW         (?i:new)
-ISVOID      (?i:isvoid)
-NOT         (?i:not)
-CASE        (?i:case)
-ESAC        (?i:esac)
-WHILE       (?i:while)
-IF          (?i:if)
-IN          (?i:in)
-INHERITS    (?i:inherits)
-LET         (?i:let)
-LOOP        (?i:loop)
-OF          (?i:of)
+(?i:class)       return CLASS;
+(?i:else)        return ELSE;
+(?i:fi)          return FI;
+(?i:if)          return IF;
+(?i:in)          return IN;
+(?i:inherits)    return INHERITS;
+(?i:let)         return LET;
+(?i:loop)        return LOOP;
+(?i:pool)        return POOL;
+(?i:then)        return THEN;
+(?i:while)       return WHILE;
+(?i:case)        return CASE;
+(?i:esac)        return ESAC;
+(?i:of)          return OF;
+(?i:new)         return NEW;
+(?i:isvoid)      return ISVOID;
+(?i:not)         return NOT;
 
 DIGIT               [0-9]
 LOWERCASE_LETTER    [a-z]
@@ -102,6 +99,23 @@ OBJECTID         ("self"|{LETTER}({LETTER}|{DIGIT}|"_")*)
 NESTED_COMMENT_START   "(*"
 NESTED_COMMENT_END     "*)"
 SIMPLE_COMMENT_START   "--"
+
+"+"         return '+';
+"-"         return '-';
+"*"         return '*';
+"/"         return '/';
+"~"         return '~';
+"<"         return '<';
+"="         return '=';
+"("         return '(';
+")"         return ')';
+"{"         return '{';
+"}"         return '}';
+";"         return ';';
+":"         return ':';
+"."         return '.';
+","         return ',';
+"@"         return '@';
 
 STR_CONST_DELIMITER              \"
 %%
@@ -171,52 +185,6 @@ STR_CONST_DELIMITER              \"
     comment_depth--;
 }
 
-  /*
-  *  The single and double character operators.
-  */
-{DARROW} return(DARROW);
-{LE}     return(LE);
-{ASSIGN} return(ASSIGN);
-
- /*
-  * Keywords are case-insensitive except for the values true and false,
-  * which must begin with a lower-case letter.
-  */
-
-{CLASS}     return (CLASS);
-{ELSE}      return (ELSE);
-{FI}        return (FI);
-{IF}        return (IF);
-{IN}        return (IN);
-{INHERITS}  return (INHERITS);
-{LET}       return (LET);
-{LOOP}      return (LOOP);
-{POOL}      return (POOL);
-{THEN}      return (THEN);
-{WHILE}     return (WHILE);
-{CASE}      return (CASE);
-{ESAC}      return (ESAC);
-{OF}        return (OF);
-{NEW}       return (NEW);
-{ISVOID}    return (ISVOID);
-{NOT}       return (NOT);
-
-"+"         return '+';
-"-"         return '-';
-"*"         return '*';
-"/"         return '/';
-"~"         return '~';
-"<"         return '<';
-"="         return '=';
-"("         return '(';
-")"         return ')';
-"{"         return '{';
-"}"         return '}';
-";"         return ';';
-":"         return ':';
-"."         return '.';
-","         return ',';
-"@"         return '@';
 
 \n {
  curr_lineno++; 
@@ -250,12 +218,7 @@ STR_CONST_DELIMITER              \"
   return (OBJECTID);
 }
 
- /*
-  *  String constants (C syntax)
-  *  Escape sequence \c is accepted for all characters c. Except for 
-  *  \n \t \b \f, the result is c.
-  *
-  */
+
 
 
 {STR_CONST_DELIMITER}  { BEGIN(STRING_CONSTANT); }
