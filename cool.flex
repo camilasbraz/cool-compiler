@@ -1,4 +1,4 @@
-[12:12, 24/09/2023] Pedro Robles Elétrica: /*
+/*
  *  The scanner definition for COOL.
  */
 
@@ -21,7 +21,7 @@
 #define MAX_STR_CONST 1025
 #define YY_NO_UNPUT   /* keep g++ happy */
 
-extern FILE fin; / we read from this file */
+extern FILE *fin; /* we read from this file */
 
 /* define YY_INPUT so we read from the FILE fin:
  * This change makes it possible to use this scanner in
@@ -55,7 +55,7 @@ int comm=0;		/* Variable for comment nesting */
 WHITESPACE		[\n\t\f\r\v]
 ALPHA			[a-zA-Z]
 DIGIT			[0-9]
-DASHCOMMENT 	--.*
+DASHCOMMENT 	--.*\n
 types		[A-Z]({ALPHA}|{DIGIT}|_)*
 objects	    [a-z]({ALPHA}|{DIGIT}|_)*
 
@@ -68,7 +68,7 @@ INT_CONST		[0-9]+
 /*
  * State Definitions
  */
-%x COMMENT STRING ESCAPE
+%x comment string escape
 
 %%
 
@@ -76,68 +76,116 @@ INT_CONST		[0-9]+
  /*
   *  The multiple-character operators.
   */
-"=>"			{ return DARROW; }
-"<-"			{ return ASSIGN; }
-"<="			{ return LE; }
+"=>"			return DARROW;
+"<-"			return ASSIGN;
+"<="			return LE;
 
 
  /*
   * Case Insensitive Keywords
   */
-(?i:class)		{ return CLASS; }
-(?i:else)		{ return ELSE; }
-(?i:fi)			{ return FI; }
-(?i:if)			{ return IF; }
-(?i:in)			{ return IN; }
-(?i:inherits)	{ return INHERITS; }
-(?i:let)		{ return LET; }
-(?i:loop)		{ return LOOP; }
-(?i:pool)		{ return POOL; }
-(?i:then)		{ return THEN; }
-(?i:while)		{ return WHILE; }
-(?i:case)		{ return CASE; }
-(?i:esac)		{ return ESAC; }
-(?i:of)			{ return OF; }
-(?i:new)		{ return NEW; }
-(?i:isvoid)		{ return ISVOID; }
-(?i:not)		{ return NOT; }
+(?i:class)		return CLASS;
+(?i:else)		return ELSE;
+(?i:fi)			return FI;
+(?i:if)			return IF;
+(?i:in)			return IN;
+(?i:inherits)		return INHERITS;
+(?i:let)		return LET;
+(?i:loop)		return LOOP;
+(?i:pool)		return POOL;
+(?i:then)		return THEN;
+(?i:while)		return WHILE;
+(?i:case)		return CASE;
+(?i:esac)		return ESAC;
+(?i:of)			return OF;
+(?i:new)		return NEW;
+(?i:isvoid)		return ISVOID;
+(?i:not)		return NOT;
 
  /*
   * Start Case sensitive booleans
   */
-{TRUE}			{ cool_yylval.boolean = true; return BOOL_CONST; }
-{FALSE}			{ cool_yylval.boolean = false; return BOOL_CONST; }
+{TRUE}			{ cool_yylval.boolean = true;
+			return (BOOL_CONST); }
+{FALSE}			{ cool_yylval.boolean = false;
+			return (BOOL_CONST); }
 
  /*
   * Identifiers for Ints, Types and Objects
   */
-{INT_CONST}		{ cool_yylval.symbol = inttable.add_string(yytext); return INT_CONST; }
-{types}			{ cool_yylval.symbol = idtable.add_string(yytext); return TYPEID; }
-{objects}|(self)	{ cool_yylval.symbol = idtable.add_string(yytext); return OBJECTID; }
+{ints}			{
+				cool_yylval.symbol = inttable.add_string(yytext);
+				return INT_CONST;
+			}
+{types}			{
+				cool_yylval.symbol = idtable.add_string(yytext);
+				return TYPEID;
+			}
+{objects}|(self)	{
+				cool_yylval.symbol = idtable.add_string(yytext);
+				return OBJECTID;
+			}
 
  /*
   * Single Character Special Syntactic Symbols
   */
-{SINGLES}		{ return int(yytext[0]); }
+{SINGLES}		return int(yytext[0]);
 
  /*
   * Single Invalid Characters
   */
-{INVALID}		{ cool_yylval.error_msg = yytext; return ERROR; }
+{INVALID}		{
+				cool_yylval.error_msg = yytext;
+				return ERROR;
+			}
+/*
+ * Integer constants.
+ */
+
+{INT_CONST}		{ cool_yylval.symbol = inttable.add_string(yytext);
+			return (INT_CONST); }
 
  /*
   * All Comments handled here
   */
-"--"(.)*
-"*)"			{ cool_yylval.error_msg = "Unmatched *)"; return ERROR; }
-"(*"			{ comm = comm + 1; BEGIN(COMMENT); }
 
-<COMMENT><<EOF>>	{ BEGIN(INITIAL); if(comm>0){ cool_yylval.error_msg = "EOF in comment."; comm=0; return ERROR; } }
+"--"(.)*
+
+"*)"			{
+				cool_yylval.error_msg = "Unmatched *)";
+				return ERROR;
+			}
+"(*"			{
+				comm = comm + 1;
+				BEGIN(COMMENT);
+			}
+
+<COMMENT><<EOF>>	{
+				BEGIN(INITIAL);
+				if(comm>0){
+					cool_yylval.error_msg = "EOF in comment.";
+					comm=0;
+					return ERROR;
+				}
+			}
+
 <COMMENT>\n		++curr_lineno;
+
 <COMMENT>. { }
 <COMMENT>"(*"		++comm;
-<COMMENT>"*)"		{ comm = comm - 1; if(comm == 0) BEGIN(INITIAL); else if(comm < 0){ cool_yylval.error_msg = "Unmatched *)"; comm = 0; BEGIN(INITIAL); return ERROR; } }
-<COMMENT>{WHITESPACE}+
+<COMMENT>"*)"		{
+				comm = comm - 1;
+				if(comm == 0) {
+					BEGIN(INITIAL);
+				} else if(comm < 0){
+					cool_yylval.error_msg = "Unmatched *)";
+					comm = 0;
+					BEGIN(INITIAL);
+					return ERROR;
+				}
+}
+<comment>{WHITESPACE}+
+
 {DASHCOMMENT} { curr_lineno++; }
 
  /*
@@ -147,11 +195,11 @@ INT_CONST		[0-9]+
   *
   */
 "\""	{
-		BEGIN(STRING);
+		BEGIN(string);
 		string_buf_ptr = string_buf;
 	}
 
-<STRING>"\""		{
+<string>"\""		{
 				if(string_buf_ptr - string_buf > MAX_STR_CONST-1){
 					*string_buf = '\0';
 					return maxStrLength();
@@ -161,42 +209,41 @@ INT_CONST		[0-9]+
 				BEGIN(INITIAL);
 				return STR_CONST;
 			}
-<STRING><<EOF>>		{
+<string><<EOF>>		{
 				cool_yylval.error_msg = "EOF in comment";
 				BEGIN(INITIAL);
 				return ERROR;
 			}
-<STRING>\0		{
+<string>\0		{
 				*string_buf = '\0';
 				cool_yylval.error_msg = "String contains null character";
-				BEGIN(ESCAPE);
+				BEGIN(escape);
 				return ERROR;
 			}
-<STRING>\n		{
+<string>\n		{
 				*string_buf = '\0';
 				BEGIN(INITIAL);
 				cool_yylval.error_msg = "Unterminated string constant";
 				return ERROR;
 			}
-<STRING>"\\n"		*string_buf_ptr++ = '\n';
-<STRING>"\\t"		*string_buf_ptr++ = '\t';
-<STRING>"\\b"		*string_buf_ptr++ = '\b';
-<STRING>"\\f"		*string_buf_ptr++ = '\f';
-<STRING>"\\\\"[^\0]	*string_buf_ptr++ = yytext[2];
-[12:12, 24/09/2023] Pedro Robles Elétrica: <STRING>"\\"[^\0]	*string_buf_ptr++ = yytext[1];
-<STRING>.		*string_buf_ptr++ = *yytext;
+<string>"\\n"		*string_buf_ptr++ = '\n';
+<string>"\\t"		*string_buf_ptr++ = '\t';
+<string>"\\b"		*string_buf_ptr++ = '\b';
+<string>"\\f"		*string_buf_ptr++ = '\f';
+<string>"\\"[^\0]	*string_buf_ptr++ = yytext[1];
+<string>.		*string_buf_ptr++ = *yytext;
 
-<ESCAPE>[\n\"]	BEGIN(INITIAL);
-<ESCAPE>[^\n\"]	*string_buf_ptr++ = yytext[0];
+<escape>[\n|"]		BEGIN(INITIAL);
+<escape>[^\n|"]
 
  /*
   * Skip all Whitespace characters
   */
 \n		curr_lineno++;
-{WHITESPACE}+
+{whitespace}+
 
  /*
-  * When nothing matches, report error text
+  * When nothing matches report error text
   */
 .		{
 			cool_yylval.error_msg = yytext;
@@ -207,33 +254,6 @@ INT_CONST		[0-9]+
 
 int maxStrLength() {
     cool_yylval.error_msg = "String constant too long";
-	BEGIN(ESCAPE);
-	return ERROR;
-}
-[12:15, 24/09/2023] Pedro Robles Elétrica: <STRING>"\\"[^\0]	*string_buf_ptr++ = yytext[1];
-<STRING>.		*string_buf_ptr++ = *yytext;
-
-<ESCAPE>[\n\"]	BEGIN(INITIAL);
-<ESCAPE>[^\n\"]	*string_buf_ptr++ = yytext[0];
-
- /*
-  * Skip all Whitespace characters
-  */
-\n		curr_lineno++;
-{WHITESPACE}+
-
- /*
-  * When nothing matches, report error text
-  */
-.		{
-			cool_yylval.error_msg = yytext;
-			return ERROR;
-		}
-
-%%
-
-int maxStrLength() {
-    cool_yylval.error_msg = "String constant too long";
-	BEGIN(ESCAPE);
+	BEGIN(escape);
 	return ERROR;
 }
