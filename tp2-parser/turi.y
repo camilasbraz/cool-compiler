@@ -348,15 +348,36 @@
                     ;
     %%
 
-    void yyerror(char *s)
-    {
+  void yyerror(char *s)
+  {
       extern int curr_lineno;
+      extern char *yytext;
+
+      // Obtém a posição do erro na linha
+      int error_position = 1;
+      char *pos = yytext;
+      while (pos > curr_text && *pos != '\n') {
+          pos--;
+          error_position++;
+      }
+
+      // Imprime uma mensagem de erro detalhada
+      cerr << "Error at line " << curr_lineno << ", position " << error_position << ": " << s << endl;
+      cerr << "Error context: ";
       
-      cerr << "\"" << curr_filename << "\", line " << curr_lineno << ": " \
-      << s << " at or near ";
-      print_cool_token(yychar);
+      // Imprime o contexto ao redor do erro (10 caracteres antes e depois do erro)
+      int context_start = max(0, error_position - 10);
+      int context_end = min(strlen(yytext), error_position + 10);
+      for (int i = context_start; i < context_end; i++) {
+          cerr << yytext[i];
+      }
       cerr << endl;
+
       omerrs++;
-      
-      if(omerrs>50) {fprintf(stdout, "More than 50 errors\n"); exit(1);}
-    }
+
+      if (omerrs > 50) {
+          fprintf(stdout, "More than 50 errors\n");
+          exit(1);
+      }
+  }
+
