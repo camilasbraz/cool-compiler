@@ -3,31 +3,35 @@
 *              Parser definition for the COOL language.
 *
 */
+
+/* http://www.gnu.org/software/bison/manual/bison.html#Prologue
+ */
 %{
-#include <iostream>
-#include "cool-tree.h"
-#include "stringtab.h"
-#include "utilities.h"
+  #include <iostream>
+  #include "cool-tree.h"
+  #include "stringtab.h"
+  #include "utilities.h"
+  #include "list.h"
   
-    extern char *curr_filename;
+  extern char *curr_filename;
   
   
-    /* Locations */
-#define YYLTYPE int              /* the type of locations */
-#define cool_yylloc curr_lineno  /* use the curr_lineno from the lexer
-                                    for the location of tokens */
+  /* Locations */
+  #define YYLTYPE int              /* the type of locations */
+  #define cool_yylloc curr_lineno  /* use the curr_lineno from the lexer
+  for the location of tokens */
     
     extern int node_lineno;          /* set before constructing a tree node
-                                        to whatever you want the line number
-                                        for the tree node to be */
+    to whatever you want the line number
+    for the tree node to be */
       
       
-#define YYLLOC_DEFAULT(Current, Rhs, N)               \
-    Current = Rhs[1];                                 \
-    node_lineno = Current;
+      #define YYLLOC_DEFAULT(Current, Rhs, N)         \
+      Current = Rhs[1];                             \
+      node_lineno = Current;
     
     
-#define SET_NODELOC(Current)                    \
+    #define SET_NODELOC(Current)  \
     node_lineno = Current;
     
     /* IMPORTANT NOTE ON LINE NUMBERS
@@ -40,13 +44,13 @@
     * (fictional) construct that matches a plus between two integer constants. 
     * (SUCH A RULE SHOULD NOT BE  PART OF YOUR PARSER):
     
-    plus_consts	: INT_CONST '+' INT_CONST 
+    plus_consts : INT_CONST '+' INT_CONST 
     
     * where INT_CONST is a terminal for an integer constant. Now, a correct
     * action for this rule that attaches the correct line number to plus_const
     * would look like the following:
     
-    plus_consts	: INT_CONST '+' INT_CONST 
+    plus_consts : INT_CONST '+' INT_CONST 
     {
       // Set the line number of the current non-terminal:
       // ***********************************************
@@ -76,11 +80,11 @@
     
     void yyerror(char *s);        /*  defined below; called for each parse error */
     extern int yylex();           /*  the entry point to the lexer  */
-    Symbol self = idtable.add_string("self");
+
     /************************************************************************/
     /*                DONT CHANGE ANYTHING IN THIS SECTION                  */
     
-    Program ast_root;	      /* the result of the parse  */
+    Program ast_root;       /* the result of the parse  */
     Classes parse_results;        /* for use in semantic analysis */
     int omerrs = 0;               /* number of errors in lexing and parsing */
     %}
@@ -133,164 +137,143 @@
     %type <program> program
     %type <classes> class_list
     %type <class_> class
-    %type <formals> formal_list
+    %type <features> features_list
+    %type <features> features
+    %type <feature> feature
+    %type <formals> formals
     %type <formal> formal
-    %type <features> optional_feature_list feature_list declaration_list
-    %type <feature> feature declaration
-    %type <expressions> expression_list expression_block
-    %type <expression> expression
-    %type <cases> case_list
-    %type <case_> case_
-    /* Precedence declarations go here. */
-    
+    %type <cases> case_branch_list 
+    %type <case_> case_branch
+    %type <expressions> one_or_more_expr
+    %type <expressions> param_expr
+    %type <expression> expr
+    %type <expression> let_expr
+
     %right ASSIGN
-    %precedence NOT
-    %nonassoc '<' '=' LE
+    %left NOT
+    %nonassoc LE '<' '='
     %left '+' '-'
     %left '*' '/'
-    %precedence ISVOID
-    %precedence '~'
-    %precedence '@'
-    %precedence '.'
-    
+    %left ISVOID
+    %left '~'
+    %left '@'
+    %left '.'
+
     %%
-    /* 
-    Save the root of the abstract syntax tree in a global variable.
-    */
-program	: class_list	
-    { 
-      @$ = @1; ast_root = program($1); 
-    }
-    ;
+    /* Think about what this grammar means; a program is made up of a list of one or more classes */
+    program     : class_list { 
+                    /* Save the root of the abstract syntax tree in a global variable @$ 
+                     * See section 6.5 in the Tour of Cool pdf */
+                    @$ = @1; ast_root = program($1); }
+                ;
     
-class_list : class ';'		/* single class */
-    { 
-        SET_NODELOC(@1);
-        $$ = single_Classes($1);
-        parse_results = $$; 
-    }
-    | class_list  class ';'	/* several classes */
-    { 
-        SET_NODELOC(@2);
-        $$ = append_Classes($1,single_Classes($2)); 
-        parse_results = $$; 
-    }
-    | class_list error ';'
-    ;
+    class_list  : class {
+
+                    $$ = single_Classes($1);
+
+                    parse_results = $$; }
+                | class_list class {
+                    $$ = append_Classes($1,single_Classes($2));
+                    parse_results = $$; }
+                ;
     
-    /* If no parent is specified, the class inherits from the Object class. */
-class	: CLASS TYPEID '{' optional_feature_list '}' 
-    { 
-        SET_NODELOC(@1);
-        $$ = class_($2,idtable.add_string("Object"),$4,
-                    stringtable.add_string(curr_filename)); 
-    }
-    | CLASS TYPEID INHERITS TYPEID '{' optional_feature_list '}' 
-    {
-        SET_NODELOC(@1);
-        $$ = class_($2,$4,$6,stringtable.add_string(curr_filename)); 
-    }
-    | error
-    ;
+    class     : CLASS TYPEID '{' features_list '}' ';' {
+                    $$ = class_($2, idtable.add_string("Object"), $4, stringtable.add_string(curr_filename)); }
+                | CLASS TYPEID INHERITS TYPEID '{' features_list '}' ';' {
+                    $$ = class_($2, $4, $6, stringtable.add_string(curr_filename)); }
 
-optional_feature_list: %empty { $$ = nil_Features(); }
-    | feature_list
-    ;
+                | CLASS TYPEID '{' error '}' ';' { yyclearin; $$ = NULL; }
+                | CLASS error '{' features_list '}' ';' { yyclearin; $$ = NULL; }
+                | CLASS error '{' error '}' ';' { yyclearin; $$ = NULL; }
+                ;
 
-/* Feature list may be empty, but no empty features in list. */
-feature_list: feature ';'  { SET_NODELOC(@1); $$ = single_Features($1); }
-    | feature_list feature ';' { SET_NODELOC(@2); $$ = append_Features($1, single_Features($2)); }
-    | feature_list error ';'
-    | error  { $$ = nil_Features(); }
-    ;
+    features_list   : features { $$ = $1; }
+                    | { $$ = nil_Features(); }
+                    ;
+    features    : feature ';' { $$ = single_Features($1); }
+                | features feature ';' { $$ = append_Features($1, single_Features($2)); }
+                | error ';' { yyclearin; $$ = NULL; }
+                ;
+    feature     : OBJECTID '(' formals ')' ':' TYPEID '{' expr '}' { $$ = method($1, $3, $6, $8); }
 
-feature: OBJECTID '(' formal_list ')' ':' TYPEID '{' expression '}' { SET_NODELOC(@1); $$ = method($1, $3, $6, $8); }
-    | declaration { SET_NODELOC(@1); $$ = $1; }
-    ;
+                | OBJECTID ':' TYPEID { $$ = attr($1, $3, no_expr()); }
+                | OBJECTID ':' TYPEID ASSIGN expr { $$ = attr($1, $3, $5); }
+                ;
 
-formal_list: formal { $$ = single_Formals($1); }
-    | formal_list ',' formal { SET_NODELOC(@3); $$ = append_Formals($1, single_Formals($3)); }
-    | %empty { $$ = nil_Formals(); }
-    | formal_list ',' error
-    ;
+    formals     : formal { $$ = single_Formals($1); }
+                | formals ',' formal { $$ = append_Formals($1, single_Formals($3)); }
 
-formal: OBJECTID ':' TYPEID { SET_NODELOC(@1); $$ = formal($1, $3); }
+                | { $$ = nil_Formals(); }
+                ;
+    formal      : OBJECTID ':' TYPEID { $$ = formal($1, $3); }
+                ;
 
-expression_block: expression ';' { SET_NODELOC(@1); $$ = single_Expressions($1); }
-    | expression_block  expression  ';' { SET_NODELOC(@2); $$ = append_Expressions($1, single_Expressions($2)); }
-    | expression_block error ';'
-    | error { $$ = nil_Expressions(); }
-    ;
+    expr        : OBJECTID ASSIGN expr { $$ = assign($1, $3); }
 
-expression_list: expression { SET_NODELOC(@1); $$ = single_Expressions($1); }
-    | expression_list ',' expression { SET_NODELOC(@1); $$ = append_Expressions($1, single_Expressions($3)); }
-    | %empty { $$ = nil_Expressions(); }
-    | expression_list ',' error
-    | error { $$ = nil_Expressions(); }
-    ;
+                | expr '.' OBJECTID '(' param_expr ')' { $$ = dispatch($1, $3, $5); }
+                | expr '@' TYPEID '.' OBJECTID '(' param_expr ')' { $$ = static_dispatch($1, $3, $5, $7); }
+                | OBJECTID '(' param_expr ')' { $$ = dispatch(object(idtable.add_string("self")), $1, $3); }
 
-declaration_list: declaration { SET_NODELOC(@1); $$ = single_Features($1); }
-    | declaration_list ',' declaration { SET_NODELOC(@1); $$ = append_Features($1, single_Features($3)) ;}
-    | declaration_list ',' error
-    | error { $$ = nil_Features(); }
-    ;
+                | IF expr THEN expr ELSE expr FI { $$ = cond($2, $4, $6); }
+                | WHILE expr LOOP expr POOL { $$ = loop($2, $4); }
 
-declaration: OBJECTID ':' TYPEID { SET_NODELOC(@1); $$ = attr($1, $3, no_expr()); }               
-    | OBJECTID ':' TYPEID ASSIGN expression { SET_NODELOC(@1); $$ = attr($1, $3, $5); }
-    ;
+                | '{' one_or_more_expr '}' { $$ = block($2); }
 
-case_list: case_ ';' { SET_NODELOC(@1); $$ = single_Cases($1); }
-    |  case_list case_ ';' { SET_NODELOC(@1); $$ = append_Cases($1, single_Cases($2)); }
-    | case_list error ';'
-    ;  
+                | LET let_expr { $$ = $2; }
 
-case_   : OBJECTID ':' TYPEID DARROW expression  { SET_NODELOC(@1); $$ = branch($1, $3, $5); }
-;
+                | CASE expr OF case_branch_list ESAC { $$ = typcase($2, $4); }
 
-expression: OBJECTID ASSIGN expression { SET_NODELOC(@1); $$ =  assign($1, $3); }
-    | expression '@' TYPEID '.' OBJECTID '(' expression_list ')' { SET_NODELOC(@1); $$ = static_dispatch($1, $3, $5, $7); }
-    | expression '.' OBJECTID '(' expression_list ')' { SET_NODELOC(@1); $$ = dispatch($1, $3, $5); }
-    | OBJECTID '(' expression_list ')'
-    {
-        SET_NODELOC(@1);
-        $$ = dispatch(object(self), $1, $3);
-    }
-    | IF expression THEN expression ELSE expression FI { SET_NODELOC(@1); $$ = cond($2, $4, $6); } 
-    | WHILE expression LOOP expression POOL { SET_NODELOC(@1); $$ = loop($2, $4); }
-    | '{' expression_block '}' { SET_NODELOC(@1); $$ = block($2); }
-    | LET declaration_list IN expression
-    {
-        SET_NODELOC(@1);
-        int len = $2->len();
-        Expression expr = $4;
-        for (int i = len - 1; i >= 0 ; i--) {
-            attr_class* declaration = static_cast<attr_class*>($2->nth(i));
-            expr = let(declaration->name, declaration->type_decl, declaration->init, expr);
-        }
-        $$ = expr;
-    }
-    | CASE expression OF case_list ESAC { SET_NODELOC(@1); $$ = typcase($2, $4); }
-    | NEW TYPEID                    { SET_NODELOC(@1); $$ = new_($2); }
-    | ISVOID expression             { SET_NODELOC(@1); $$ = isvoid($2); }
-    | expression '*' expression     { SET_NODELOC(@1); $$ = mul($1, $3); }
-    | expression '/' expression     { SET_NODELOC(@1); $$ = divide($1, $3); }
-    | expression '+' expression     { SET_NODELOC(@1); $$ = plus($1, $3); }
-    | expression '-' expression     { SET_NODELOC(@1); $$ = sub($1, $3); }
-    | '~' expression                { SET_NODELOC(@1); $$ = neg($2); }
-    | expression '<' expression     { SET_NODELOC(@1); $$ = lt($1, $3); }
-    | expression LE expression      { SET_NODELOC(@1); $$ = leq($1, $3); }
-    | expression '=' expression     { SET_NODELOC(@1); $$ = eq($1, $3); }
-    | NOT expression                { SET_NODELOC(@1); $$ = comp($2); }
-    | '(' expression ')'	      { SET_NODELOC(@1); $$ = $2; }
-    | OBJECTID                      { SET_NODELOC(@1); $$ = object($1); } 
-    | STR_CONST                     { SET_NODELOC(@1); $$ = string_const($1);}
-    | INT_CONST                     { SET_NODELOC(@1); $$ = int_const($1); }
-    | BOOL_CONST                    { SET_NODELOC(@1); $$ = bool_const($1); }
-    ;
-    /* end of grammar */
+                | NEW TYPEID { $$ = new_($2); }
+                | ISVOID expr { $$ = isvoid($2); }
+
+                | expr '+' expr { $$ = plus($1, $3); }
+                | expr '-' expr { $$ = sub($1, $3); }
+                | expr '*' expr { $$ = mul($1, $3); }
+                | expr '/' expr { $$ = divide($1, $3); }
+                | '~' expr { $$ = neg($2); }
+                | expr '<' expr { $$ = lt($1, $3); }
+                | expr LE expr { $$ = leq($1, $3); }
+                | expr '=' expr { $$ = eq($1, $3); }
+                | NOT expr { $$ = comp($2); }
+
+                | '(' expr ')' { $$ = $2; }
+
+                | OBJECTID { $$ = object($1); }
+
+                | INT_CONST { $$ = int_const($1); }
+                | STR_CONST { $$ = string_const($1); }
+                | BOOL_CONST { $$ = bool_const($1); }
+                ;
+
+    let_expr    : OBJECTID ':' TYPEID IN expr { $$ = let($1, $3, no_expr(), $5); }
+                | OBJECTID ':' TYPEID ASSIGN expr IN expr { $$ = let($1, $3, $5, $7); }
+                | OBJECTID ':' TYPEID ',' let_expr { $$ = let($1, $3, no_expr(), $5); }
+                | OBJECTID ':' TYPEID ASSIGN expr ',' let_expr { $$ = let($1, $3, $5, $7); }
+                | error IN expr { yyclearin; $$ = NULL; }
+                | error ',' let_expr { yyclearin; $$ = NULL; }
+                ;
+
+    one_or_more_expr    : expr ';' { $$ = single_Expressions($1); }
+                        | one_or_more_expr expr ';' { $$ = append_Expressions($1, single_Expressions($2)); }
+
+                        | error ';' { yyclearin; $$ = NULL; }
+                        ;
+
+    param_expr          : expr { $$ = single_Expressions($1); }
+                        | param_expr ',' expr { $$ = append_Expressions($1, single_Expressions($3)); }
+
+                        | { $$ = nil_Expressions(); }
+                        ;
+
+    case_branch_list    : case_branch { $$ = single_Cases($1); }
+
+                        | case_branch_list case_branch { $$ = append_Cases($1, single_Cases($2)); }
+                        ;
+    case_branch         : OBJECTID ':' TYPEID DARROW expr ';' { $$ = branch($1, $3, $5); }
+                        ;
+
     %%
-    
-    /* This function is called automatically when Bison detects a parse error. */
+
     void yyerror(char *s)
     {
       extern int curr_lineno;
@@ -303,5 +286,3 @@ expression: OBJECTID ASSIGN expression { SET_NODELOC(@1); $$ =  assign($1, $3); 
       
       if(omerrs>50) {fprintf(stdout, "More than 50 errors\n"); exit(1);}
     }
-    
-    
