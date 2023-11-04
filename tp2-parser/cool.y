@@ -133,8 +133,36 @@
     value of each non terminal. (See section 3.6 in the bison 
     documentation for details). */
     
-    %type <program> Program
-    %type <classes> Classes
+    %type <program> program
+    %type <classes> class_list
+    %type <class_> class
+    %type <features> features_list
+    %type <features> empty_list
+    %type <features> features
+    %type <feature> feature
+    %type <feature> method_feature
+    %type <feature> attribute_feature
+    %type <formals> formals
+    %type <formals> non_empty_formals
+    %type <formal> formal
+    %type <expression> expr
+    %type <expression> basic_expression
+    %type <expression> conditional_expression
+    %type <expression> loop_Expression
+    %type <expression> block_Expression
+    %type <expression> let_Expression
+    %type <expression> case_Expression
+    %type <expression> new_Expression
+    %type <expression> sVoid_Expression
+    %type <expression> Arithmetic_Expression
+    %type <expression> Logical_Expression
+    %type <expression> Let_Expr
+    %type <expressions> One_more_Expr
+    %type <expressions> Param_expr
+
+
+
+    %type <classes> 
     %type <class_> Class_
     %type <features> Features
     %type <feature> Feature
@@ -150,14 +178,14 @@
     %type <expression> Let_Expression
     %type <expression> Case_Expression
     %type <expression> New_Expression
-    %type <expression> IsVoid_Expression
-    %type <expression> Arithmetic_Expression
-    %type <expression> Logical_Expression
-    %type <expression> Let_Expr
-    %type <expressions> One_more_Expr
-    %type <expressions> Param_expr
-    %type <cases> Cases
-    %type <case_branch> Case
+    %type <expression> isvoid_expression
+    %type <expression> arithmetic_expression
+    %type <expression> logical_expression
+    %type <expression> let_expression
+    %type <expressions> one_or_more_expr
+    %type <expressions> param_expr
+    %type <cases> case_branch_list 
+    %type <case_> case_branch
 
 
 
