@@ -322,14 +322,20 @@
 
     void yyerror(char *s)
     {
-      extern int curr_lineno;
-      
-      cerr << "\"" << curr_filename << "\", line " << curr_lineno << ": " \
-      << s << " at or near ";
-      print_cool_token(yychar);
-      cerr << endl;
-      omerrs++;
-      
-      if(omerrs>50) {fprintf(stdout, "More than 50 errors\n"); exit(1);}
+        extern int curr_lineno;
+        extern char *yytext;
+
+        cerr << "ERROS ENCONTRADOS" << endl;
+        cerr << "Arquivo: " << curr_filename << ", Linha: " << curr_lineno << endl;
+        cerr << "Erro: " << s << endl;
+        cerr << "Token: " << yytext << endl;
+
+        omerrs++;
+
+        if (omerrs > 50)
+        {
+            fprintf(stdout, "More than 50 errors\n");
+            exit(1);
+        }
     }
 
