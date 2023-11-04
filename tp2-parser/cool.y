@@ -160,35 +160,6 @@
     %type <expressions> One_more_Expr
     %type <expressions> Param_expr
 
-
-
-    %type <classes> 
-    %type <class_> Class_
-    %type <features> Features
-    %type <feature> Feature
-    %type <feature> Method_Feature
-    %type <feature> Attribute_Feature
-    %type <formals> Formals
-    %type <formal> Formal
-    %type <expression> Expression
-    %type <expression> Basic_Expression
-    %type <expression> Conditional_Expression
-    %type <expression> Loop_Expression
-    %type <expression> Block_Expression
-    %type <expression> Let_Expression
-    %type <expression> Case_Expression
-    %type <expression> New_Expression
-    %type <expression> isvoid_expression
-    %type <expression> arithmetic_expression
-    %type <expression> logical_expression
-    %type <expression> let_expression
-    %type <expressions> one_or_more_expr
-    %type <expressions> param_expr
-    %type <cases> case_branch_list 
-    %type <case_> case_branch
-
-
-
     %right ASSIGN
     %left NOT
     %nonassoc LE '<' '='
