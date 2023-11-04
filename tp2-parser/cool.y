@@ -143,7 +143,7 @@
     %type <attribute_feature> Attribute_Feature
     %type <formals> Formals
     %type <formal> Formal
-    %type <expression> Expression
+    %type <expr> Expression
     %type <basic_expression> Basic_Expression
     %type <conditional_expression> Conditional_Expression
     %type <loop_expression> Loop_Expression
@@ -245,7 +245,7 @@
             }
           ;
 
-    expression : basic_expression { $$ = $1; }
+    expr : basic_expression { $$ = $1; }
            | conditional_expression { $$ = $1; }
            | loop_expression { $$ = $1; }
            | block_expression { $$ = $1; }
