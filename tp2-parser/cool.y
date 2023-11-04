@@ -139,6 +139,7 @@
     %type <features> features_list
     %type <features> empty_list
     %type <features> features
+    %type <features> multiple_features
     %type <feature> feature
     %type <feature> method_feature
     %type <feature> attribute_feature
