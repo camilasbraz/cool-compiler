@@ -134,20 +134,31 @@
     documentation for details). */
     
     /* Declare types for the grammar's non-terminals. */
-    %type <program> program
-    %type <classes> class_list
-    %type <class_> class
-    %type <features> features_list
-    %type <features> features
-    %type <feature> feature
-    %type <formals> formals
-    %type <formal> formal
-    %type <cases> case_branch_list 
-    %type <case_> case_branch
-    %type <expressions> one_or_more_expr
-    %type <expressions> param_expr
-    %type <expression> expr
-    %type <expression> let_expr
+    %type <program> Program
+    %type <class_list> Classes
+    %type <class> Class_
+    %type <features_list> Features
+    %type <feature> Feature
+    %type <method_feature> Method_Feature
+    %type <attribute_feature> Attribute_Feature
+    %type <formals> Formals
+    %type <formal> Formal
+    %type <expression> Expression
+    %type <basic_expression> Basic_Expression
+    %type <conditional_expression> Conditional_Expression
+    %type <loop_expression> Loop_Expression
+    %type <block_expression> Block_Expression
+    %type <let_expression> Let_Expression
+    %type <case_expression> Case_Expression
+    %type <new_expression> New_Expression
+    %type <isvoid_expression> IsVoid_Expression
+    %type <arithmetic_expression> Arithmetic_Expression
+    %type <logical_expression> Logical_Expression
+    %type <let_expr> Expression
+    %type <one_or_more_expr> Expressions
+    %type <param_expr> Expressions
+    %type <case_branch_list> Cases
+    %type <case_branch> Case
 
     %right ASSIGN
     %left NOT
