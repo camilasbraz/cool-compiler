@@ -153,12 +153,15 @@
     %type <expression> let_Expression
     %type <expression> case_Expression
     %type <expression> new_Expression
-    %type <expression> sVoid_Expression
-    %type <expression> Arithmetic_Expression
-    %type <expression> Logical_Expression
-    %type <expression> Let_Expr
-    %type <expressions> One_more_Expr
-    %type <expressions> Param_expr
+    %type <expression> isvoid_expression
+    %type <expression> arithmetic_expression
+    %type <expression> logical_expression
+    %type <expression> let_expression
+    %type <expressions> one_or_more_expr
+    %type <expressions> param_expr
+    %type <cases> case_branch_list 
+    %type <case_> case_branch
+
 
     %right ASSIGN
     %left NOT
