@@ -133,32 +133,32 @@
     value of each non terminal. (See section 3.6 in the bison 
     documentation for details). */
     
-    /* Declare types for the grammar's non-terminals. */
     %type <program> Program
-    %type <class_list> Classes
-    %type <class> Class_
-    %type <features_list> Features
+    %type <classes> Classes
+    %type <class_> Class_
+    %type <features> Features
     %type <feature> Feature
-    %type <method_feature> Method_Feature
-    %type <attribute_feature> Attribute_Feature
+    %type <feature> Method_Feature
+    %type <feature> Attribute_Feature
     %type <formals> Formals
     %type <formal> Formal
-    %type <expr> Expression
-    %type <basic_expression> Basic_Expression
-    %type <conditional_expression> Conditional_Expression
-    %type <loop_expression> Loop_Expression
-    %type <block_expression> Block_Expression
-    %type <let_expression> Let_Expression
-    %type <case_expression> Case_Expression
-    %type <new_expression> New_Expression
-    %type <isvoid_expression> IsVoid_Expression
-    %type <arithmetic_expression> Arithmetic_Expression
-    %type <logical_expression> Logical_Expression
-    %type <let_expr> Let_Expr
-    %type <one_or_more_expr> One_more_Expr
-    %type <param_expr> Param_expr
-    %type <case_branch_list> Cases
+    %type <expression> Expression
+    %type <expression> Basic_Expression
+    %type <expression> Conditional_Expression
+    %type <expression> Loop_Expression
+    %type <expression> Block_Expression
+    %type <expression> Let_Expression
+    %type <expression> Case_Expression
+    %type <expression> New_Expression
+    %type <expression> IsVoid_Expression
+    %type <expression> Arithmetic_Expression
+    %type <expression> Logical_Expression
+    %type <expression> Let_Expr
+    %type <expressions> One_more_Expr
+    %type <expressions> Param_expr
+    %type <cases> Cases
     %type <case_branch> Case
+
 
 
     %right ASSIGN
