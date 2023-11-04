@@ -168,27 +168,25 @@
             }
             ;
 
-    class_list : class_list_empty
-    | class_list class
-    ;
+    class_list  : class {
 
-    class_list_empty : /* empty */ { $$ = nil_Classes(); }
-    | class_list_empty class { $$ = append_Classes($1, single_Classes($2)); }
-    ;
+                    $$ = single_Classes($1);
 
-    class : TYPEID class_tail
-    ;
+                    parse_results = $$; }
+                | class_list class {
+                    $$ = append_Classes($1,single_Classes($2));
+                    parse_results = $$; }
+                ;
+    
+    class     : CLASS TYPEID '{' features_list '}' ';' {
+                    $$ = class_($2, idtable.add_string("Object"), $4, stringtable.add_string(curr_filename)); }
+                | CLASS TYPEID INHERITS TYPEID '{' features_list '}' ';' {
+                    $$ = class_($2, $4, $6, stringtable.add_string(curr_filename)); }
 
-    class_tail : '{' features_list '}' ';' {
-                          /* Cria um objeto de classe com nome, tipo pai, lista de features e nome do arquivo /
-                          $$ = class_($1, idtable.add_string("Object"), $3, stringtable.add_string(curr_filename));
-                          }
-                          | '{' features_list '}' INHERITS TYPEID ';' {
-                          / Cria um objeto de classe com nome, tipo pai, lista de features e nome do arquivo */
-                          $$ = class_($1, $3, $5, stringtable.add_string(curr_filename));
-                          }
-                          | error ';' { yyclearin; $$ = NULL; }
-    ;
+                | CLASS TYPEID '{' error '}' ';' { yyclearin; $$ = NULL; }
+                | CLASS error '{' features_list '}' ';' { yyclearin; $$ = NULL; }
+                | CLASS error '{' error '}' ';' { yyclearin; $$ = NULL; }
+                ;
 
     /* Lista de features: pode ser vazia ou conter uma ou mais features */
     features_list : features { $$ = $1; }
