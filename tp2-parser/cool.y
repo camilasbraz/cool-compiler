@@ -155,8 +155,8 @@
     %type <arithmetic_expression> Arithmetic_Expression
     %type <logical_expression> Logical_Expression
     %type <let_expr> Let_Expr
-    %type <one_or_more_expr> Expressions
-    %type <param_expr> Expressions
+    %type <one_or_more_expr> One_more_Expr
+    %type <param_expr> Param_expr
     %type <case_branch_list> Cases
     %type <case_branch> Case
 
