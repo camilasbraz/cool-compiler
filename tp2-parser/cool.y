@@ -148,11 +148,11 @@
     %type <expression> expr
     %type <expression> basic_expression
     %type <expression> conditional_expression
-    %type <expression> loop_Expression
-    %type <expression> block_Expression
-    %type <expression> let_Expression
-    %type <expression> case_Expression
-    %type <expression> new_Expression
+    %type <expression> loop_expression
+    %type <expression> block_expression
+    %type <expression> let_expression
+    %type <expression> case_expression
+    %type <expression> new_expression
     %type <expression> isvoid_expression
     %type <expression> arithmetic_expression
     %type <expression> logical_expression
