@@ -156,6 +156,7 @@
     %type <expression> isvoid_expression
     %type <expression> arithmetic_expression
     %type <expression> logical_expression
+    %type <expression> let_expr
     %type <expressions> one_or_more_expr
     %type <expressions> param_expr
     %type <cases> case_branch_list 
