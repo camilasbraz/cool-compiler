@@ -216,6 +216,8 @@
             | error ';' { yyclearin; $$ = NULL; }
             ;
 
+    multiple_features: features feature ';' { $$ = append_Features($1, single_Features($2)); };
+
     feature : method_feature { $$ = $1; }
             | attribute_feature { $$ = $1; }
             ;
