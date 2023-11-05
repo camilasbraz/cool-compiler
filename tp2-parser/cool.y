@@ -351,7 +351,7 @@
                 }
               ;
 
-    case_branch_list : single_casesingle_case_branch_list_branch
+    case_branch_list : single_case_branch_list
                  | case_branch_list single_case_branch_list
                  ;
 
