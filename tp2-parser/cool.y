@@ -162,7 +162,6 @@
     %type <expression> let_assign_expr
     %type <expression> let_multiple_expr
     %type <expression> let_assign_multiple_expr
-    %type <expression> expr_list
     %type <expressions> one_or_more_expr
     %type <expressions> param_expr
     %type <cases> case_branch_list
@@ -275,6 +274,7 @@
                         | BOOL_CONST { $$ = bool_const($1); }
                         | '(' expr ')' { $$ = $2; }
 
+
     conditional_expression : IF expr THEN expr ELSE expr FI { $$ = cond($2, $4, $6); }
     loop_expression : WHILE expr LOOP expr POOL { $$ = loop($2, $4); }
 
@@ -324,21 +324,11 @@
                               }
                             ;
 
-    expr_list : expr ';' {
-              $$ = single_Expressions($1);
-            }
-          | expr_list expr ';' {
-              $$ = append_Expressions($1, single_Expressions($2));
-            }
-          ;
+    one_or_more_expr    : expr ';' { $$ = single_Expressions($1); }
+                        | one_or_more_expr expr ';' { $$ = append_Expressions($1, single_Expressions($2)); }
 
-    one_or_more_expr : expr_list
-                    | error ';' {
-                        yyclearin;
-                        $$ = NULL;
-                      }
-                    ;
-
+                        | error ';' { yyclearin; $$ = NULL; }
+                        ;
 
     param_expr : expr {
                   $$ = single_Expressions($1);
