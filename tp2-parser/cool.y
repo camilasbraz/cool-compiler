@@ -158,8 +158,14 @@
     %type <expression> arithmetic_expression
     %type <expression> logical_expression
     %type <expression> let_expr
+    %type <expression> let_single_expr
+    %type <expression> let_assign_expr
+    %type <expression> let_multiple_expr
+    %type <expression> let_assign_multiple_expr
+    %type <expression> expr_list
     %type <expressions> one_or_more_expr
     %type <expressions> param_expr
+    %type <cases> single_case_branch
     %type <cases> case_branch_list 
     %type <case_> case_branch
 
@@ -290,33 +296,79 @@
                           | expr '=' expr { $$ = eq($1, $3); }
                           | NOT expr { $$ = comp($2); }
 
+    let_expr : let_single_expr
+            | let_assign_expr
+            | let_multiple_expr
+            | let_assign_multiple_expr
+            | error IN expr { yyclearin; $$ = NULL; }
+            | error ',' let_expr { yyclearin; $$ = NULL; }
+            ;
 
-    let_expr    : OBJECTID ':' TYPEID IN expr { $$ = let($1, $3, no_expr(), $5); }
-                | OBJECTID ':' TYPEID ASSIGN expr IN expr { $$ = let($1, $3, $5, $7); }
-                | OBJECTID ':' TYPEID ',' let_expr { $$ = let($1, $3, no_expr(), $5); }
-                | OBJECTID ':' TYPEID ASSIGN expr ',' let_expr { $$ = let($1, $3, $5, $7); }
-                | error IN expr { yyclearin; $$ = NULL; }
-                | error ',' let_expr { yyclearin; $$ = NULL; }
+    let_single_expr : OBJECTID ':' TYPEID IN expr {
+                      $$ = let($1, $3, no_expr(), $5);
+                    }
+                  ;
+
+    let_assign_expr : OBJECTID ':' TYPEID ASSIGN expr IN expr {
+                        $$ = let($1, $3, $5, $7);
+                      }
+                    ;
+
+    let_multiple_expr : OBJECTID ':' TYPEID ',' let_expr {
+                          $$ = let($1, $3, no_expr(), $5);
+                        }
+                      ;
+
+    let_assign_multiple_expr : OBJECTID ':' TYPEID ASSIGN expr ',' let_expr {
+                                $$ = let($1, $3, $5, $7);
+                              }
+                            ;
+
+    expr_list : expr ';' {
+              $$ = single_Expressions($1);
+            }
+          | expr_list expr ';' {
+              $$ = append_Expressions($1, single_Expressions($2));
+            }
+          ;
+
+    one_or_more_expr : expr_list
+                    | error ';' {
+                        yyclearin;
+                        $$ = NULL;
+                      }
+                    ;
+
+
+    param_expr : expr {
+                  $$ = single_Expressions($1);
+                }
+              | param_expr ',' expr {
+                  $$ = append_Expressions($1, single_Expressions($3));
+                }
+              | {
+                  $$ = nil_Expressions();
+                }
+              ;
+
+    case_branch_list : single_case_branch
+                 | case_branch_list single_case_branch_list
+                 ;
+
+    single_case_branch_list : case_branch {
+                                $$ = single_Cases($1);
+                              }
+                            | single_case_branch_list case_branch {
+                                $$ = append_Cases($1, single_Cases($2));
+                              }
+                            ;
+
+
+    case_branch : OBJECTID ':' TYPEID DARROW expr ';' {
+                    $$ = branch($1, $3, $5);
+                  }
                 ;
 
-    one_or_more_expr    : expr ';' { $$ = single_Expressions($1); }
-                        | one_or_more_expr expr ';' { $$ = append_Expressions($1, single_Expressions($2)); }
-
-                        | error ';' { yyclearin; $$ = NULL; }
-                        ;
-
-    param_expr          : expr { $$ = single_Expressions($1); }
-                        | param_expr ',' expr { $$ = append_Expressions($1, single_Expressions($3)); }
-
-                        | { $$ = nil_Expressions(); }
-                        ;
-
-    case_branch_list    : case_branch { $$ = single_Cases($1); }
-
-                        | case_branch_list case_branch { $$ = append_Cases($1, single_Cases($2)); }
-                        ;
-    case_branch         : OBJECTID ':' TYPEID DARROW expr ';' { $$ = branch($1, $3, $5); }
-                        ;
 
     %%
 
