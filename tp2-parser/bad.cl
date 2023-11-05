@@ -15,3 +15,9 @@ Class D inherts A {
 
 Class E inherits A {
 ;
+
+class A {
+    method(): Int {
+        1 + "string"; // Erro: tentativa de adicionar um inteiro com uma string
+    };
+};
