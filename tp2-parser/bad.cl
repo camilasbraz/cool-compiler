@@ -16,8 +16,10 @@ Class D inherts A {
 Class E inherits A {
 ;
 
-class A {
+class Main {
     method(): Int {
-        1 + "string"; // Erro: tentativa de adicionar um inteiro com uma string
+        // Erro: declaração de variável com um tipo inválido
+        let x : UndefType <- 42 in
+        x + 1;
     };
 };
