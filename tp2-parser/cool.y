@@ -165,8 +165,8 @@
     %type <expression> expr_list
     %type <expressions> one_or_more_expr
     %type <expressions> param_expr
-    %type <cases> single_case_branch
-    %type <cases> case_branch_list 
+    %type <cases> case_branch_list
+    %type <cases> single_case_branch_list
     %type <case_> case_branch
 
 
