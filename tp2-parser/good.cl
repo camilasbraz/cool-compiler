@@ -10,6 +10,5 @@ Class BB__ inherits A {
 class B inherits A {
 hello(): Object {
 out_string("Hello, World!\n")
-new A
 };
 };
