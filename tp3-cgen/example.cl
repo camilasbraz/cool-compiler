@@ -31,9 +31,7 @@ class Circle inherits Shape {
   };
 
   calculate_area(): Int {
-    let pi: Int <- 3 in {
-      radius * radius * pi
-    }
+    radius * radius * 3
   };
 };
 
