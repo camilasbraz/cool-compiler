@@ -15,6 +15,32 @@ O projeto consiste em vários arquivos, com o principal sendo `cgen.cc`. Este ar
 - Funções para emitir dados globais e constantes.
 - Funções para emitir instruções SPIM.
 
+O `cgen.cc` é um componente crucial no projeto de compilação da linguagem COOL (Classroom Object-Oriented Language), especificamente no contexto da geração de código. Este arquivo atua como a espinha dorsal do gerador de código, sendo responsável por traduzir a Árvore de Análise Sintática Abstrata (AST) de COOL em código de máquina, mais especificamente para a arquitetura SPIM, uma versão simplificada do MIPS.
+
+### Estrutura e Função
+
+- **Núcleo do Gerador de Código:** `cgen.cc` contém a implementação central do gerador de código. Ele percorre a AST gerada pelas fases anteriores do compilador e emite o código de máquina correspondente.
+- **Emissão de Instruções:** Uma parte importante de `cgen.cc` é a lógica para emitir instruções de máquina apropriadas com base nos nós da AST.
+
+### Componentes Importantes
+
+- **Início e Fim da Emissão de Código:** O arquivo geralmente começa com o código necessário para configurar o ambiente de execução e termina com a finalização do código gerado.
+- **Tabelas de Símbolos e Despacho:** `cgen.cc` também gerencia tabelas de despacho e tabelas de símbolos, que são cruciais para a resolução de métodos e atributos durante a execução.
+- **Otimizações e Convenções:** O arquivo também pode implementar otimizações básicas e seguir convenções específicas para melhorar a eficiência do código gerado.
+
+### Desafios e Complexidades
+
+- **Mapeamento de AST para Instruções:** Um dos maiores desafios é mapear os conceitos de alto nível de COOL para instruções de máquina de baixo nível.
+- **Gerenciamento de Memória:** A alocação e gerenciamento de memória, especialmente para objetos e estruturas de dados dinâmicos, é uma parte complexa da geração de código.
+
+### Extensibilidade e Manutenção
+
+- **Adição de Novas Funcionalidades:** `cgen.cc` é projetado para ser extensível, permitindo que novas funcionalidades sejam adicionadas conforme necessário.
+- **Depuração e Testes:** A complexidade de `cgen.cc` exige um processo robusto de depuração e testes para garantir a geração correta de código.
+
+Em resumo, `cgen.cc` é o coração do gerador de código no projeto COOL, lidando com a tradução intrincada de estruturas de programação orientada a objetos de alto nível para instruções de máquina compreensíveis por um processador SPIM.
+
+
 ## `cgen.h` - Arquivo de Cabeçalho
 `cgen.h` é o arquivo de cabeçalho para o gerador de código. Sinta-se à vontade para adicionar o que for necessário.
 
