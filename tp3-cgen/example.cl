@@ -4,16 +4,15 @@ class Main {
       (new IO).out_string("Testing COOL Program\n");
       let myShape : Shape <- new Shape,
           myCircle : Circle <- new Circle,
-          myRectangle : Rectangle <- new Rectangle
-      in {
+          myRectangle : Rectangle <- new Rectangle in {
         myShape.display();
         myCircle.display();
         myRectangle.display();
         myRectangle.set_width_height(4, 5);
         (new IO).out_string("Area of Rectangle: ").
         out_int(myRectangle.calculate_area());
-      }
-    }
+      }; // Closing the block started after the 'in' keyword
+    }; // Closing the block for the main method
   };
 };
 
