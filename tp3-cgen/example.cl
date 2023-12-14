@@ -31,7 +31,7 @@ class Circle inherits Shape {
   };
 
   calculate_area(): Int {
-    radius * radius * 3  // Ideally, this should be πr²
+    radius * radius * 3
   };
 };
 
