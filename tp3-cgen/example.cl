@@ -11,8 +11,8 @@ class Main {
         myRectangle.set_width_height(4, 5);
         (new IO).out_string("Area of Rectangle: ").
         out_int(myRectangle.calculate_area());
-      }; // Closing the block started after the 'in' keyword
-    }; // Closing the block for the main method
+      };
+    }; 
   };
 };
 
