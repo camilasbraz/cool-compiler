@@ -1,7 +1,7 @@
 Camila Santan Braz - 2019027423
 Pedro Robles Dutenhefner - 2018072557
 
-O professor renato orientou informar que alteramos o código do arquivo cool-tree.handcode.h. Portanto, alteramos os seguintes arquivos:
+O professor Renato orientou informar que alteramos o código do arquivo cool-tree.handcode.h. Portanto, alteramos os seguintes arquivos:
 - cool-tree.handcode.h
 - cgen.cc
 - cgen.h
@@ -11,6 +11,7 @@ O professor renato orientou informar que alteramos o código do arquivo cool-tre
 - emit.h
 - example.cl
 
+Obs.: o comando make submit-clean não funcionou e por isso estamos enviando sem executá-lo.
 
 ## Visão Geral
 Este projeto implementa a geração de código para o compilador da linguagem COOL (Classroom Object-Oriented Language), desenvolvido no curso de Compiladores da Universidade de Stanford. O objetivo principal é converter a Árvore de Análise Sintática Abstrata (AST) em código de máquina SPIM, uma variante do MIPS que é usada para propósitos educacionais.
