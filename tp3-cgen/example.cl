@@ -1,17 +1,17 @@
 class Main {
   main(): IO {
     {
-      (new IO).out_string("Testing COOL Program\n");
-      let myShape : Shape <- new Shape,
-          myCircle : Circle <- new Circle,
-          myRectangle : Rectangle <- new Rectangle
+      let io: IO <- new IO,
+          myShape: Shape <- new Shape,
+          myCircle: Circle <- new Circle,
+          myRectangle: Rectangle <- new Rectangle
       in {
         myShape.display();
         myCircle.display();
         myRectangle.display();
         myRectangle.set_width_height(4, 5);
-        (new IO).out_string("Area of Rectangle: ").
-        out_int(myRectangle.calculate_area());
+        io.out_string("Area of Rectangle: ").
+        out_int(myRectangle.calculate_area()).out_string("\n");
       }
     }
   };
@@ -31,7 +31,7 @@ class Circle inherits Shape {
   };
 
   calculate_area(): Int {
-    radius * radius * 3
+    radius * radius * 3  // Ideally, this should be πr²
   };
 };
 
