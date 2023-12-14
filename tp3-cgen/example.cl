@@ -10,8 +10,7 @@ class Main {
         myCircle.display();
         myRectangle.display();
         myRectangle.set_width_height(4, 5);
-        io.out_string("Area of Rectangle: ").
-        out_int(myRectangle.calculate_area()).out_string("\n");
+        io.out_string("Area of Rectangle: ").out_int(myRectangle.calculate_area()).out_string("\n");
       }
     }
   };
@@ -31,7 +30,7 @@ class Circle inherits Shape {
   };
 
   calculate_area(): Int {
-    radius * radius * 3
+    radius * radius * 3  
   };
 };
 
