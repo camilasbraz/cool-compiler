@@ -1,3 +1,6 @@
+Camila Braz
+Pedro Robles Dutenhefner
+
 ## Visão Geral
 Este projeto implementa a geração de código para o compilador da linguagem COOL (Classroom Object-Oriented Language), desenvolvido no curso de Compiladores da Universidade de Stanford. O objetivo principal é converter a Árvore de Análise Sintática Abstrata (AST) em código de máquina SPIM, uma variante do MIPS que é usada para propósitos educacionais.
 
